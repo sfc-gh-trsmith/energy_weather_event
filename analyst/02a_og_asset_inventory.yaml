@@ -1,0 +1,322 @@
+semantic_model:
+  name: "Oil & Gas Asset & Inventory Readiness"
+  description: "Analyzes equipment failure risks from weather events and locates nearby spare parts inventory. Predicts asset-specific failure probability and maps vulnerable assets to available spare parts."
+  
+tables:
+  - name: DIM_ASSET
+    description: "Physical equipment and production assets including compressors, pumps, and turbines"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_ASSET
+    dimensions:
+      - name: ASSET_KEY
+        description: "Unique identifier for each asset"
+        data_type: NUMBER
+        unique: true
+      - name: ASSET_ID
+        synonyms: ["asset code", "equipment id"]
+        description: "Business identifier for the asset"
+        data_type: VARCHAR
+        unique: true
+      - name: ASSET_NAME
+        synonyms: ["equipment name", "asset", "equipment"]
+        description: "Descriptive name of the asset"
+        data_type: VARCHAR
+      - name: ASSET_TYPE
+        synonyms: ["equipment type", "asset category"]
+        description: "Type of equipment"
+        data_type: VARCHAR
+        sample_values: ["Compressor", "Pump", "Turbine"]
+      - name: MODEL_NUMBER
+        synonyms: ["model", "equipment model"]
+        description: "Manufacturer model number"
+        data_type: VARCHAR
+      - name: MANUFACTURER
+        synonyms: ["vendor", "OEM"]
+        description: "Equipment manufacturer"
+        data_type: VARCHAR
+      - name: ASSET_STATUS
+        synonyms: ["status", "operational status"]
+        description: "Current operational status"
+        data_type: VARCHAR
+        sample_values: ["Active", "Maintenance", "Decommissioned"]
+    measures:
+      - name: NAMEPLATE_CAPACITY
+        synonyms: ["capacity", "rated capacity"]
+        description: "Nameplate capacity rating"
+        aggregation: sum
+        data_type: NUMBER
+      - name: CRITICALITY_SCORE
+        synonyms: ["criticality", "importance score"]
+        description: "Asset criticality score (0-100)"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: FCT_MAINTENANCE_HISTORY
+    description: "Historical equipment failures and maintenance events with weather correlation"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_MAINTENANCE_HISTORY
+    dimensions:
+      - name: EVENT_TYPE
+        synonyms: ["maintenance type", "event category"]
+        description: "Type of maintenance event"
+        data_type: VARCHAR
+        sample_values: ["Failure", "Preventive Maintenance", "Inspection"]
+      - name: FAILURE_DATE
+        synonyms: ["date of failure", "when failed"]
+        description: "Date when failure occurred"
+        data_type: DATE
+      - name: FAILURE_DESCRIPTION
+        synonyms: ["description", "what happened"]
+        description: "Description of the failure"
+        data_type: VARCHAR
+      - name: ROOT_CAUSE
+        synonyms: ["cause", "why failed"]
+        description: "Root cause of the failure"
+        data_type: VARCHAR
+      - name: CORRECTIVE_ACTION
+        synonyms: ["repair action", "fix", "how repaired"]
+        description: "Actions taken to repair"
+        data_type: VARCHAR
+    measures:
+      - name: DOWNTIME_HOURS
+        synonyms: ["downtime", "hours down", "outage duration"]
+        description: "Duration of downtime in hours"
+        aggregation: sum
+        data_type: NUMBER
+      - name: MAINTENANCE_COST_USD
+        synonyms: ["repair cost", "maintenance cost", "cost"]
+        description: "Cost of maintenance in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: ESTIMATED_LOST_VOLUME_UNITS
+        synonyms: ["lost production", "production loss"]
+        description: "Estimated production lost due to failure"
+        aggregation: sum
+        data_type: NUMBER
+      - name: WEATHER_SEVERITY_AT_FAILURE
+        synonyms: ["weather severity", "weather score during failure"]
+        description: "Weather severity score at time of failure (0-100)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: TEMPERATURE_C_AT_FAILURE
+        synonyms: ["temperature during failure", "temp at failure"]
+        description: "Temperature in Celsius at time of failure"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: DIM_WAREHOUSE
+    description: "Spare parts storage locations including distribution centers and field depots"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_WAREHOUSE
+    dimensions:
+      - name: WAREHOUSE_KEY
+        description: "Unique identifier for each warehouse"
+        data_type: NUMBER
+        unique: true
+      - name: WAREHOUSE_NAME
+        synonyms: ["warehouse", "location name"]
+        description: "Name of the warehouse"
+        data_type: VARCHAR
+      - name: WAREHOUSE_TYPE
+        synonyms: ["location type"]
+        description: "Type of storage facility"
+        data_type: VARCHAR
+        sample_values: ["Distribution Center", "Field Depot", "Regional Hub"]
+    measures:
+      - name: LATITUDE
+        synonyms: ["lat"]
+        description: "Latitude coordinate"
+        aggregation: avg
+        data_type: NUMBER
+      - name: LONGITUDE
+        synonyms: ["long", "lon"]
+        description: "Longitude coordinate"
+        aggregation: avg
+        data_type: NUMBER
+      - name: TOTAL_CAPACITY_SQ_FT
+        synonyms: ["warehouse size", "capacity"]
+        description: "Total capacity in square feet"
+        aggregation: sum
+        data_type: NUMBER
+      - name: CURRENT_UTILIZATION_PERCENT
+        synonyms: ["utilization", "how full"]
+        description: "Current utilization percentage"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: DIM_SKU
+    description: "Spare parts catalog including rotating equipment, valves, and instrumentation"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_SKU
+    dimensions:
+      - name: SKU_KEY
+        description: "Unique identifier for each SKU"
+        data_type: NUMBER
+        unique: true
+      - name: PART_NUMBER
+        synonyms: ["part no", "PN"]
+        description: "Part number"
+        data_type: VARCHAR
+      - name: PART_NAME
+        synonyms: ["part", "part description"]
+        description: "Descriptive name of the part"
+        data_type: VARCHAR
+      - name: PART_CATEGORY
+        synonyms: ["category", "part type"]
+        description: "Part category"
+        data_type: VARCHAR
+        sample_values: ["Rotating Equipment", "Valves", "Electrical", "Instrumentation"]
+      - name: CRITICALITY
+        synonyms: ["importance", "critical level"]
+        description: "Part criticality level"
+        data_type: VARCHAR
+        sample_values: ["Critical", "Important", "Standard"]
+      - name: MANUFACTURER
+        synonyms: ["vendor", "OEM"]
+        description: "Part manufacturer"
+        data_type: VARCHAR
+    measures:
+      - name: UNIT_COST_USD
+        synonyms: ["cost", "price", "unit price"]
+        description: "Unit cost in USD"
+        aggregation: avg
+        data_type: NUMBER
+      - name: LEAD_TIME_DAYS
+        synonyms: ["lead time", "delivery time"]
+        description: "Lead time in days"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: FCT_INVENTORY_ON_HAND
+    description: "Spare parts inventory levels by warehouse and SKU"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_INVENTORY_ON_HAND
+    dimensions:
+      - name: STOCKOUT_RISK
+        synonyms: ["risk level", "inventory risk"]
+        description: "Risk of stockout"
+        data_type: VARCHAR
+        sample_values: ["High", "Medium", "Low", "None"]
+      - name: REORDER_NEEDED
+        synonyms: ["needs reorder", "below reorder point"]
+        description: "Whether reorder is needed"
+        data_type: BOOLEAN
+      - name: SNAPSHOT_TIMESTAMP
+        synonyms: ["as of date", "snapshot date"]
+        description: "Date of inventory snapshot"
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: ON_HAND_QUANTITY
+        synonyms: ["quantity", "qty on hand", "inventory level"]
+        description: "Quantity on hand"
+        aggregation: sum
+        data_type: NUMBER
+      - name: AVAILABLE_QUANTITY
+        synonyms: ["available qty", "qty available"]
+        description: "Quantity available (on hand minus allocated)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: TOTAL_VALUE_USD
+        synonyms: ["inventory value", "value"]
+        description: "Total inventory value in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: DAYS_OF_SUPPLY
+        synonyms: ["supply days", "days inventory"]
+        description: "Days of supply remaining"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: FCT_PRODUCTION_VOLUME
+    description: "Daily production actuals and OEE metrics by production unit"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PRODUCTION_VOLUME
+    measures:
+      - name: PLANNED_VOLUME_UNITS
+        synonyms: ["planned production", "target volume"]
+        description: "Planned production volume"
+        aggregation: sum
+        data_type: NUMBER
+      - name: ACTUAL_VOLUME_UNITS
+        synonyms: ["actual production", "production volume"]
+        description: "Actual production volume"
+        aggregation: sum
+        data_type: NUMBER
+      - name: OEE_PERCENT
+        synonyms: ["OEE", "overall equipment effectiveness"]
+        description: "Overall Equipment Effectiveness percentage"
+        aggregation: avg
+        data_type: NUMBER
+      - name: AVAILABILITY_SECONDS
+        synonyms: ["uptime", "availability"]
+        description: "Production availability in seconds"
+        aggregation: sum
+        data_type: NUMBER
+
+relationships:
+  - name: maintenance_to_asset
+    left_table: FCT_MAINTENANCE_HISTORY
+    left_column: ASSET_KEY
+    right_table: DIM_ASSET
+    right_column: ASSET_KEY
+    relationship_type: many_to_one
+    
+  - name: inventory_to_warehouse
+    left_table: FCT_INVENTORY_ON_HAND
+    left_column: WAREHOUSE_KEY
+    right_table: DIM_WAREHOUSE
+    right_column: WAREHOUSE_KEY
+    relationship_type: many_to_one
+    
+  - name: inventory_to_sku
+    left_table: FCT_INVENTORY_ON_HAND
+    left_column: SKU_KEY
+    right_table: DIM_SKU
+    right_column: SKU_KEY
+    relationship_type: many_to_one
+
+verified_queries:
+  - name: "Equipment failures by weather severity"
+    question: "How many equipment failures occurred during severe weather?"
+    sql: |
+      SELECT 
+        a.ASSET_TYPE,
+        COUNT(*) as FAILURE_COUNT,
+        AVG(m.WEATHER_SEVERITY_AT_FAILURE) as AVG_WEATHER_SEVERITY,
+        SUM(m.DOWNTIME_HOURS) as TOTAL_DOWNTIME_HOURS,
+        SUM(m.MAINTENANCE_COST_USD) as TOTAL_COST
+      FROM FCT_MAINTENANCE_HISTORY m
+      JOIN DIM_ASSET a ON m.ASSET_KEY = a.ASSET_KEY
+      WHERE m.WEATHER_SEVERITY_AT_FAILURE > 70
+        AND m.EVENT_TYPE = 'Failure'
+      GROUP BY a.ASSET_TYPE
+      ORDER BY FAILURE_COUNT DESC
+    verified_result: true
+    
+  - name: "Parts inventory by location"
+    question: "What is the current inventory value by warehouse?"
+    sql: |
+      SELECT 
+        w.WAREHOUSE_NAME,
+        w.WAREHOUSE_TYPE,
+        COUNT(DISTINCT i.SKU_KEY) as UNIQUE_PARTS,
+        SUM(i.ON_HAND_QUANTITY) as TOTAL_UNITS,
+        SUM(i.TOTAL_VALUE_USD) as TOTAL_VALUE
+      FROM FCT_INVENTORY_ON_HAND i
+      JOIN DIM_WAREHOUSE w ON i.WAREHOUSE_KEY = w.WAREHOUSE_KEY
+      GROUP BY w.WAREHOUSE_NAME, w.WAREHOUSE_TYPE
+      ORDER BY TOTAL_VALUE DESC
+    verified_result: true
+

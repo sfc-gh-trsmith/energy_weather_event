@@ -1,0 +1,1168 @@
+name: HEDGE_MISMATCH_EARLY_WARNING
+
+tables:
+  - name: DIM_TRADING_BOOK
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_TRADING_BOOK
+    dimensions:
+      - name: BOOK_KEY
+        description: Unique identifier for each trading book
+        expr: BOOK_KEY
+        data_type: NUMBER(38,0)
+      - name: BOOK_ID
+        description: Business identifier for the trading book
+        expr: BOOK_ID
+        data_type: VARCHAR(50)
+      - name: BOOK_NAME
+        description: Descriptive name of the trading book
+        expr: BOOK_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Permian Crude Hedging Book
+          - Natural Gas Physical Trading
+      - name: TRADER_NAME
+        description: Name of the trader managing this book
+        expr: TRADER_NAME
+        data_type: VARCHAR(200)
+      - name: STRATEGY
+        description: Trading strategy for this book
+        expr: STRATEGY
+        data_type: VARCHAR(200)
+        sample_values:
+          - Physical Hedging
+          - Spread Trading
+          - Basis Trading
+      - name: COMMODITY
+        description: Commodity traded in this book
+        expr: COMMODITY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Crude Oil
+          - Natural Gas
+          - NGL
+          - Power
+      - name: BUSINESS_UNIT
+        description: Business unit owning this book
+        expr: BUSINESS_UNIT
+        data_type: VARCHAR(200)
+    facts:
+      - name: VAR_LIMIT_USD
+        description: Value at Risk limit in USD
+        expr: VAR_LIMIT_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '5000000.00'
+          - '10000000.00'
+      - name: POSITION_LIMIT_UNITS
+        description: Position limit in commodity units
+        expr: POSITION_LIMIT_UNITS
+        data_type: NUMBER(18,4)
+    primary_key:
+      columns:
+        - BOOK_KEY
+
+  - name: DIM_INSTRUMENT
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_INSTRUMENT
+    dimensions:
+      - name: INSTRUMENT_KEY
+        description: Unique identifier for each trading instrument
+        expr: INSTRUMENT_KEY
+        data_type: NUMBER(38,0)
+      - name: INSTRUMENT_ID
+        description: Business identifier for the instrument
+        expr: INSTRUMENT_ID
+        data_type: VARCHAR(50)
+      - name: INSTRUMENT_TYPE
+        description: Type of trading instrument
+        expr: INSTRUMENT_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Future
+          - Swap
+          - Option
+          - Physical Contract
+      - name: INSTRUMENT_NAME
+        description: Descriptive name of the instrument
+        expr: INSTRUMENT_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - WTI Crude Oil Future
+          - Henry Hub Natural Gas Swap
+      - name: EXCHANGE
+        description: Exchange where instrument is traded
+        expr: EXCHANGE
+        data_type: VARCHAR(200)
+        sample_values:
+          - NYMEX
+          - ICE
+          - OTC
+      - name: TICKER
+        description: Trading ticker symbol
+        expr: TICKER
+        data_type: VARCHAR(50)
+      - name: COMMODITY
+        description: Underlying commodity
+        expr: COMMODITY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Crude Oil
+          - Natural Gas
+      - name: CONTRACT_UNIT
+        description: Unit of measure for contract
+        expr: CONTRACT_UNIT
+        data_type: VARCHAR(50)
+      - name: DELIVERY_TERM_TYPE
+        description: Type of delivery term
+        expr: DELIVERY_TERM_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Hub
+          - Zone
+          - Node
+          - Pipeline
+          - Financial
+      - name: PRICING_BASIS
+        description: Pricing basis for the instrument
+        expr: PRICING_BASIS
+        data_type: VARCHAR(200)
+      - name: SETTLEMENT_TYPE
+        description: Type of settlement
+        expr: SETTLEMENT_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Physical
+          - Cash
+      - name: CURRENCY
+        description: Currency for pricing
+        expr: CURRENCY
+        data_type: VARCHAR(10)
+    facts:
+      - name: CONTRACT_SIZE
+        description: Size of each contract
+        expr: CONTRACT_SIZE
+        data_type: NUMBER(18,4)
+    primary_key:
+      columns:
+        - INSTRUMENT_KEY
+
+  - name: DIM_CURVE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_CURVE
+    dimensions:
+      - name: CURVE_KEY
+        description: Unique identifier for each forward curve
+        expr: CURVE_KEY
+        data_type: NUMBER(38,0)
+      - name: CURVE_ID
+        description: Business identifier for the curve
+        expr: CURVE_ID
+        data_type: VARCHAR(50)
+      - name: CURVE_NAME
+        description: Descriptive name of the forward curve
+        expr: CURVE_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - WTI_FORWARD
+          - HH_FORWARD
+          - PERMIAN_BASIS
+      - name: CURVE_TYPE
+        description: Type of curve construction
+        expr: CURVE_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Market_Derived
+          - Model_Derived
+          - Blended
+      - name: CONSTRUCTION_METHOD
+        description: Method used to construct the curve
+        expr: CONSTRUCTION_METHOD
+        data_type: VARCHAR(200)
+        sample_values:
+          - Bootstrap
+          - Kriging
+          - Spread-Sum
+      - name: COMMODITY
+        description: Commodity for this curve
+        expr: COMMODITY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Crude Oil
+          - Natural Gas
+      - name: CURRENCY
+        description: Currency for curve prices
+        expr: CURRENCY
+        data_type: VARCHAR(10)
+      - name: UNIT
+        description: Unit of measure for curve prices
+        expr: UNIT
+        data_type: VARCHAR(50)
+        sample_values:
+          - $/BBL
+          - $/MMBTU
+      - name: FORWARD_TENOR_SCHEMA
+        description: Tenor schema for forward curve
+        expr: FORWARD_TENOR_SCHEMA
+        data_type: VARCHAR(200)
+        sample_values:
+          - Monthly
+          - Quarterly
+          - Prompt+Strips
+      - name: IS_ACTIVE
+        description: Whether curve is currently active
+        expr: IS_ACTIVE
+        data_type: BOOLEAN
+    facts: []
+    primary_key:
+      columns:
+        - CURVE_KEY
+
+  - name: DIM_FORECAST_VERSION
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_FORECAST_VERSION
+    dimensions:
+      - name: FORECAST_VERSION_KEY
+        description: Unique identifier for each forecast version
+        expr: FORECAST_VERSION_KEY
+        data_type: NUMBER(38,0)
+      - name: FORECAST_VERSION_ID
+        description: Business identifier for the forecast version
+        expr: FORECAST_VERSION_ID
+        data_type: VARCHAR(50)
+      - name: FORECAST_NAME
+        description: Descriptive name of the forecast
+        expr: FORECAST_NAME
+        data_type: VARCHAR(200)
+      - name: FORECAST_TYPE
+        description: Type of forecast
+        expr: FORECAST_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Operational
+          - Budget
+          - Rolling
+          - What-If
+      - name: FORECAST_SOURCE
+        description: Source system for the forecast
+        expr: FORECAST_SOURCE
+        data_type: VARCHAR(200)
+        sample_values:
+          - SCADA Aggregation
+          - Planning System
+          - Manual Entry
+      - name: CONFIDENCE_LEVEL
+        description: Confidence level of the forecast
+        expr: CONFIDENCE_LEVEL
+        data_type: VARCHAR(50)
+        sample_values:
+          - P10
+          - P50
+          - P90
+      - name: IS_OFFICIAL
+        description: Whether this is the official forecast
+        expr: IS_OFFICIAL
+        data_type: BOOLEAN
+      - name: CREATED_BY
+        description: User who created the forecast version
+        expr: CREATED_BY
+        data_type: VARCHAR(200)
+    time_dimensions:
+      - name: FORECAST_RUN_DATE
+        description: Date when forecast was run
+        expr: FORECAST_RUN_DATE
+        data_type: DATE
+    facts:
+      - name: FORECAST_HORIZON_MONTHS
+        description: Forecast horizon in months
+        expr: FORECAST_HORIZON_MONTHS
+        data_type: NUMBER(5,0)
+      - name: VERSION_NUMBER
+        description: Version number of the forecast
+        expr: VERSION_NUMBER
+        data_type: NUMBER(10,0)
+    primary_key:
+      columns:
+        - FORECAST_VERSION_KEY
+
+  - name: DIM_DELIVERY_POINT
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_DELIVERY_POINT
+    dimensions:
+      - name: DELIVERY_POINT_KEY
+        description: Unique identifier for each delivery point
+        expr: DELIVERY_POINT_KEY
+        data_type: NUMBER(38,0)
+      - name: DELIVERY_POINT_CODE
+        description: Business code for the delivery point
+        expr: DELIVERY_POINT_CODE
+        data_type: VARCHAR(50)
+      - name: DELIVERY_POINT_NAME
+        description: Descriptive name of the delivery point
+        expr: DELIVERY_POINT_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Cushing OK Hub
+          - Henry Hub LA
+          - Permian Basin Zone
+      - name: COMMODITY
+        description: Commodity for this delivery point
+        expr: COMMODITY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Crude
+          - Natural Gas
+          - Power
+      - name: MARKET_ISO_OR_PIPELINE
+        description: Market, ISO, or pipeline name
+        expr: MARKET_ISO_OR_PIPELINE
+        data_type: VARCHAR(200)
+      - name: LOCATION_TYPE
+        description: Type of delivery location
+        expr: LOCATION_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Hub
+          - Zone
+          - Node
+          - Pool
+          - Meter
+      - name: REGION
+        description: Geographic region
+        expr: REGION
+        data_type: VARCHAR(100)
+      - name: COUNTRY
+        description: Country
+        expr: COUNTRY
+        data_type: VARCHAR(100)
+      - name: STATE_PROVINCE
+        description: State or province
+        expr: STATE_PROVINCE
+        data_type: VARCHAR(100)
+      - name: IS_ACTIVE
+        description: Whether delivery point is currently active
+        expr: IS_ACTIVE
+        data_type: BOOLEAN
+    facts:
+      - name: LATITUDE
+        description: Latitude coordinate of delivery point
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of delivery point
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+    primary_key:
+      columns:
+        - DELIVERY_POINT_KEY
+
+  - name: DIM_INTERCONNECTION_POINT
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_INTERCONNECTION_POINT
+    dimensions:
+      - name: INTERCONNECTION_POINT_KEY
+        description: Unique identifier for each interconnection point
+        expr: INTERCONNECTION_POINT_KEY
+        data_type: NUMBER(38,0)
+      - name: INTERCONNECTION_ID
+        description: Business identifier for the interconnection point
+        expr: INTERCONNECTION_ID
+        data_type: VARCHAR(50)
+      - name: INTERCONNECTION_NAME
+        description: Descriptive name of the interconnection point
+        expr: INTERCONNECTION_NAME
+        data_type: VARCHAR(200)
+      - name: GRID_OR_PIPELINE
+        description: Grid or pipeline name
+        expr: GRID_OR_PIPELINE
+        data_type: VARCHAR(200)
+      - name: NODE_OR_METER_ID
+        description: Node or meter identifier
+        expr: NODE_OR_METER_ID
+        data_type: VARCHAR(100)
+      - name: BALANCING_AUTHORITY
+        description: Balancing authority name
+        expr: BALANCING_AUTHORITY
+        data_type: VARCHAR(200)
+      - name: VOLTAGE_OR_SEGMENT
+        description: Voltage level or pipeline segment
+        expr: VOLTAGE_OR_SEGMENT
+        data_type: VARCHAR(100)
+      - name: IS_ACTIVE
+        description: Whether interconnection point is currently active
+        expr: IS_ACTIVE
+        data_type: BOOLEAN
+    facts:
+      - name: LATITUDE
+        description: Latitude coordinate of interconnection point
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of interconnection point
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+    primary_key:
+      columns:
+        - INTERCONNECTION_POINT_KEY
+
+  - name: DIM_SITE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_SITE
+    dimensions:
+      - name: SITE_KEY
+        description: Unique identifier for each site location
+        expr: SITE_KEY
+        data_type: NUMBER(38,0)
+      - name: SITE_ID
+        description: Business identifier for the site
+        expr: SITE_ID
+        data_type: VARCHAR(50)
+      - name: SITE_NAME
+        description: Descriptive name of the site
+        expr: SITE_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Midland Production Facility
+          - Delaware Basin Processing Plant
+      - name: SITE_TYPE
+        description: Type of site
+        expr: SITE_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Project
+          - Production
+          - Warehouse
+      - name: REGION
+        description: Geographic region or basin
+        expr: REGION
+        data_type: VARCHAR(100)
+        sample_values:
+          - Permian Basin
+          - Bakken Formation
+          - Eagle Ford Shale
+      - name: COUNTRY
+        description: Country where site is located
+        expr: COUNTRY
+        data_type: VARCHAR(100)
+      - name: STATE_PROVINCE
+        description: State or province
+        expr: STATE_PROVINCE
+        data_type: VARCHAR(100)
+      - name: SITE_STATUS
+        description: Current operational status
+        expr: SITE_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Active
+          - Under Construction
+    facts:
+      - name: LATITUDE
+        description: Latitude coordinate of site location
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of site location
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+      - name: SITE_READINESS_SCORE
+        description: Site operational readiness score (0-100)
+        expr: SITE_READINESS_SCORE
+        data_type: NUMBER(3,0)
+    primary_key:
+      columns:
+        - SITE_KEY
+
+  - name: DIM_ASSET
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_ASSET
+    dimensions:
+      - name: ASSET_KEY
+        description: Unique identifier for each physical asset
+        expr: ASSET_KEY
+        data_type: NUMBER(38,0)
+      - name: ASSET_ID
+        description: Business identifier for the asset
+        expr: ASSET_ID
+        data_type: VARCHAR(50)
+      - name: ASSET_NAME
+        description: Descriptive name of the physical asset
+        expr: ASSET_NAME
+        data_type: VARCHAR(200)
+      - name: ASSET_TYPE
+        description: Type of physical asset
+        expr: ASSET_TYPE
+        data_type: VARCHAR(100)
+        sample_values:
+          - Pump
+          - Compressor
+          - Turbine
+          - Well
+          - Pipeline
+      - name: ASSET_CATEGORY
+        description: High-level category of asset
+        expr: ASSET_CATEGORY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Production
+          - Transportation
+          - Processing
+      - name: ASSET_STATUS
+        description: Current operational status of the asset
+        expr: ASSET_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Active
+          - Maintenance
+          - Decommissioned
+    facts:
+      - name: NAMEPLATE_CAPACITY
+        description: Nameplate capacity of the asset
+        expr: NAMEPLATE_CAPACITY
+        data_type: NUMBER(18,4)
+      - name: CRITICALITY_SCORE
+        description: Asset criticality score from 0-100
+        expr: CRITICALITY_SCORE
+        data_type: NUMBER(3,0)
+    primary_key:
+      columns:
+        - ASSET_KEY
+
+  - name: FCT_ETRM_POSITIONS
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_ETRM_POSITIONS
+    dimensions:
+      - name: POSITION_KEY
+        description: Unique identifier for each position record
+        expr: POSITION_KEY
+        data_type: NUMBER(38,0)
+      - name: POSITION_TYPE
+        description: Type of position
+        expr: POSITION_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Long
+          - Short
+          - Flat
+    time_dimensions:
+      - name: SNAPSHOT_TIMESTAMP
+        description: Timestamp of position snapshot
+        expr: SNAPSHOT_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: NOTIONAL_VOLUME
+        description: Notional volume of the position (can be negative for short)
+        expr: NOTIONAL_VOLUME
+        data_type: NUMBER(18,4)
+      - name: WEIGHTED_AVG_PRICE
+        description: Weighted average price of the position
+        expr: WEIGHTED_AVG_PRICE
+        data_type: NUMBER(18,4)
+      - name: DELTA
+        description: Delta Greek measure
+        expr: DELTA
+        data_type: NUMBER(18,6)
+      - name: GAMMA
+        description: Gamma Greek measure
+        expr: GAMMA
+        data_type: NUMBER(18,6)
+      - name: VEGA
+        description: Vega Greek measure
+        expr: VEGA
+        data_type: NUMBER(18,6)
+      - name: THETA
+        description: Theta Greek measure
+        expr: THETA
+        data_type: NUMBER(18,6)
+      - name: UNREALIZED_PNL_USD
+        description: Unrealized profit and loss in USD
+        expr: UNREALIZED_PNL_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '250000.00'
+          - '-150000.00'
+      - name: REALIZED_PNL_USD
+        description: Realized profit and loss in USD
+        expr: REALIZED_PNL_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '125000.00'
+          - '-85000.00'
+    primary_key:
+      columns:
+        - POSITION_KEY
+
+  - name: FCT_PRODUCTION_FORECAST
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PRODUCTION_FORECAST
+    dimensions:
+      - name: FORECAST_KEY
+        description: Unique identifier for each forecast record
+        expr: FORECAST_KEY
+        data_type: NUMBER(38,0)
+      - name: VOLUME_UNIT
+        description: Unit of measure for volume
+        expr: VOLUME_UNIT
+        data_type: VARCHAR(50)
+        sample_values:
+          - BBL
+          - MCF
+          - MWh
+      - name: FORECAST_CONFIDENCE
+        description: Confidence level of the forecast
+        expr: FORECAST_CONFIDENCE
+        data_type: VARCHAR(50)
+        sample_values:
+          - High
+          - Medium
+          - Low
+    time_dimensions:
+      - name: FORECAST_TIMESTAMP
+        description: Timestamp when forecast was generated
+        expr: FORECAST_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: P10_VOLUME
+        description: 10th percentile volume forecast (low case)
+        expr: P10_VOLUME
+        data_type: NUMBER(18,4)
+      - name: P50_VOLUME
+        description: 50th percentile volume forecast (base case)
+        expr: P50_VOLUME
+        data_type: NUMBER(18,4)
+      - name: P90_VOLUME
+        description: 90th percentile volume forecast (high case)
+        expr: P90_VOLUME
+        data_type: NUMBER(18,4)
+      - name: DETERMINISTIC_VOLUME
+        description: Single point deterministic forecast
+        expr: DETERMINISTIC_VOLUME
+        data_type: NUMBER(18,4)
+      - name: ASSUMED_UPTIME_PERCENT
+        description: Assumed uptime percentage
+        expr: ASSUMED_UPTIME_PERCENT
+        data_type: NUMBER(5,2)
+      - name: ASSUMED_RATE
+        description: Assumed production rate
+        expr: ASSUMED_RATE
+        data_type: NUMBER(18,4)
+      - name: WEATHER_IMPACT_VOLUME
+        description: Expected weather impact on volume
+        expr: WEATHER_IMPACT_VOLUME
+        data_type: NUMBER(18,4)
+      - name: OUTAGE_IMPACT_VOLUME
+        description: Expected outage impact on volume
+        expr: OUTAGE_IMPACT_VOLUME
+        data_type: NUMBER(18,4)
+      - name: STANDARD_DEVIATION
+        description: Standard deviation of forecast
+        expr: STANDARD_DEVIATION
+        data_type: NUMBER(18,4)
+    primary_key:
+      columns:
+        - FORECAST_KEY
+
+  - name: FCT_CURVE_DATA
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_CURVE_DATA
+    dimensions:
+      - name: CURVE_DATA_KEY
+        description: Unique identifier for each curve data point
+        expr: CURVE_DATA_KEY
+        data_type: NUMBER(38,0)
+      - name: CONTANGO_BACKWARDATION
+        description: Contango or backwardation indicator
+        expr: CONTANGO_BACKWARDATION
+        data_type: VARCHAR(50)
+    time_dimensions:
+      - name: SNAPSHOT_TIMESTAMP
+        description: Timestamp of curve snapshot
+        expr: SNAPSHOT_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: PRICE
+        description: Forward price at this point on the curve
+        expr: PRICE
+        data_type: NUMBER(18,4)
+      - name: VOLATILITY
+        description: Implied volatility if available
+        expr: VOLATILITY
+        data_type: NUMBER(10,6)
+      - name: BID
+        description: Bid price
+        expr: BID
+        data_type: NUMBER(18,4)
+      - name: ASK
+        description: Ask price
+        expr: ASK
+        data_type: NUMBER(18,4)
+      - name: VOLUME
+        description: Trading volume if market-derived
+        expr: VOLUME
+        data_type: NUMBER(18,4)
+      - name: OPEN_INTEREST
+        description: Open interest
+        expr: OPEN_INTEREST
+        data_type: NUMBER(18,4)
+      - name: FORWARD_PREMIUM_DISCOUNT
+        description: Forward premium or discount vs spot/prompt
+        expr: FORWARD_PREMIUM_DISCOUNT
+        data_type: NUMBER(18,4)
+    primary_key:
+      columns:
+        - CURVE_DATA_KEY
+
+  - name: FCT_PHYSICAL_DELIVERY
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PHYSICAL_DELIVERY
+    dimensions:
+      - name: DELIVERY_KEY
+        description: Unique identifier for each delivery record
+        expr: DELIVERY_KEY
+        data_type: NUMBER(38,0)
+      - name: FLOW_TYPE
+        description: Type of flow
+        expr: FLOW_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Scheduled
+          - Actualized
+          - Forecast
+      - name: DIRECTION
+        description: Direction of flow
+        expr: DIRECTION
+        data_type: VARCHAR(50)
+        sample_values:
+          - Receipt
+          - Delivery
+      - name: BALANCING_PERIOD_ID
+        description: Balancing period identifier
+        expr: BALANCING_PERIOD_ID
+        data_type: VARCHAR(50)
+    time_dimensions:
+      - name: SNAPSHOT_TIMESTAMP
+        description: Timestamp of delivery snapshot
+        expr: SNAPSHOT_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: SCHEDULED_VOLUME
+        description: Scheduled delivery volume
+        expr: SCHEDULED_VOLUME
+        data_type: NUMBER(18,4)
+      - name: ACTUAL_VOLUME
+        description: Actual delivered volume
+        expr: ACTUAL_VOLUME
+        data_type: NUMBER(18,4)
+      - name: IMBALANCE_VOLUME
+        description: Imbalance volume (Actual - Scheduled)
+        expr: IMBALANCE_VOLUME
+        data_type: NUMBER(18,4)
+      - name: LOSS_FACTOR
+        description: Loss factor for transmission
+        expr: LOSS_FACTOR
+        data_type: NUMBER(10,6)
+    primary_key:
+      columns:
+        - DELIVERY_KEY
+
+  - name: FCT_MISMATCH_RISK
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_MISMATCH_RISK
+    dimensions:
+      - name: MISMATCH_KEY
+        description: Unique identifier for each mismatch risk record
+        expr: MISMATCH_KEY
+        data_type: NUMBER(38,0)
+      - name: SIMULATION_RUN_ID
+        description: Identifier for the simulation run
+        expr: SIMULATION_RUN_ID
+        data_type: VARCHAR(100)
+      - name: PRIMARY_RISK_DRIVER
+        description: Primary driver of the mismatch risk
+        expr: PRIMARY_RISK_DRIVER
+        data_type: VARCHAR(200)
+      - name: RISK_LEVEL
+        description: Risk level classification
+        expr: RISK_LEVEL
+        data_type: VARCHAR(50)
+        sample_values:
+          - Low
+          - Medium
+          - High
+          - Critical
+      - name: ALERT_TRIGGERED
+        description: Whether an alert was triggered (TRUE/FALSE)
+        expr: ALERT_TRIGGERED
+        data_type: BOOLEAN
+    time_dimensions:
+      - name: SIMULATION_TIMESTAMP
+        description: Timestamp of simulation run
+        expr: SIMULATION_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: HEDGED_VOLUME
+        description: Hedged volume from ETRM positions
+        expr: HEDGED_VOLUME
+        data_type: NUMBER(18,4)
+      - name: P50_DELIVERABLE_VOLUME
+        description: P50 deliverable volume from production forecast
+        expr: P50_DELIVERABLE_VOLUME
+        data_type: NUMBER(18,4)
+      - name: P10_DELIVERABLE_VOLUME
+        description: P10 deliverable volume from production forecast
+        expr: P10_DELIVERABLE_VOLUME
+        data_type: NUMBER(18,4)
+      - name: P90_DELIVERABLE_VOLUME
+        description: P90 deliverable volume from production forecast
+        expr: P90_DELIVERABLE_VOLUME
+        data_type: NUMBER(18,4)
+      - name: MISMATCH_PROBABILITY
+        description: Probability of mismatch (0-1 scale)
+        expr: MISMATCH_PROBABILITY
+        data_type: NUMBER(5,4)
+      - name: EXPECTED_MISMATCH_UNITS
+        description: Expected mismatch in units (can be positive or negative)
+        expr: EXPECTED_MISMATCH_UNITS
+        data_type: NUMBER(18,4)
+      - name: P95_MISMATCH_UNITS
+        description: 95th percentile mismatch (Value at Risk)
+        expr: P95_MISMATCH_UNITS
+        data_type: NUMBER(18,4)
+      - name: EXPECTED_PNL_IMPACT_USD
+        description: Expected PnL impact in USD
+        expr: EXPECTED_PNL_IMPACT_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '500000.00'
+          - '-350000.00'
+      - name: VAR_IMPACT_USD
+        description: Value at Risk impact in USD
+        expr: VAR_IMPACT_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '2000000.00'
+          - '1500000.00'
+      - name: WEATHER_CONTRIBUTION_PERCENT
+        description: Weather contribution to risk as percentage
+        expr: WEATHER_CONTRIBUTION_PERCENT
+        data_type: NUMBER(5,2)
+      - name: OUTAGE_CONTRIBUTION_PERCENT
+        description: Outage contribution to risk as percentage
+        expr: OUTAGE_CONTRIBUTION_PERCENT
+        data_type: NUMBER(5,2)
+      - name: BASIS_CONTRIBUTION_PERCENT
+        description: Basis differential contribution to risk as percentage
+        expr: BASIS_CONTRIBUTION_PERCENT
+        data_type: NUMBER(5,2)
+    primary_key:
+      columns:
+        - MISMATCH_KEY
+
+  - name: FCT_WEATHER_FORECAST
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_WEATHER_FORECAST
+    dimensions:
+      - name: FORECAST_KEY
+        description: Unique identifier for each weather forecast record
+        expr: FORECAST_KEY
+        data_type: NUMBER(38,0)
+      - name: WEATHER_CONDITION
+        description: Categorical weather condition
+        expr: WEATHER_CONDITION
+        data_type: VARCHAR(100)
+        sample_values:
+          - Clear
+          - Rain
+          - Hurricane
+          - Extreme Cold
+      - name: WEATHER_CATEGORY
+        description: Weather severity classification
+        expr: WEATHER_CATEGORY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Normal
+          - Severe
+          - Extreme
+    time_dimensions:
+      - name: FORECAST_RUN_TIME
+        description: Timestamp when the forecast was generated
+        expr: FORECAST_RUN_TIME
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: TEMPERATURE_C
+        description: Temperature in degrees Celsius
+        expr: TEMPERATURE_C
+        data_type: NUMBER(6,2)
+      - name: TEMPERATURE_F
+        description: Temperature in degrees Fahrenheit
+        expr: TEMPERATURE_F
+        data_type: NUMBER(6,2)
+      - name: PRECIPITATION_MM
+        description: Precipitation amount in millimeters
+        expr: PRECIPITATION_MM
+        data_type: NUMBER(8,2)
+      - name: WIND_SPEED_KPH
+        description: Wind speed in kilometers per hour
+        expr: WIND_SPEED_KPH
+        data_type: NUMBER(6,2)
+      - name: WIND_SPEED_MPH
+        description: Wind speed in miles per hour
+        expr: WIND_SPEED_MPH
+        data_type: NUMBER(6,2)
+      - name: HUMIDITY_PERCENT
+        description: Relative humidity percentage
+        expr: HUMIDITY_PERCENT
+        data_type: NUMBER(5,2)
+      - name: STORM_SEVERITY_SCORE
+        description: Storm severity score from 0-100
+        expr: STORM_SEVERITY_SCORE
+        data_type: NUMBER(5,2)
+      - name: WEATHER_SEVERITY_SCORE
+        description: Overall weather severity score from 0-100
+        expr: WEATHER_SEVERITY_SCORE
+        data_type: NUMBER(5,2)
+    primary_key:
+      columns:
+        - FORECAST_KEY
+
+  - name: DIM_TIME
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_TIME
+    dimensions:
+      - name: TIME_KEY
+        description: Unique identifier for each date
+        expr: TIME_KEY
+        data_type: NUMBER(38,0)
+      - name: YEAR
+        description: Year (YYYY)
+        expr: YEAR
+        data_type: NUMBER(4,0)
+        sample_values:
+          - '2024'
+          - '2025'
+      - name: QUARTER
+        description: Quarter of year (1-4)
+        expr: QUARTER
+        data_type: NUMBER(1,0)
+      - name: MONTH
+        description: Month number (1-12)
+        expr: MONTH
+        data_type: NUMBER(2,0)
+      - name: MONTH_NAME
+        description: Name of the month
+        expr: MONTH_NAME
+        data_type: VARCHAR(20)
+        sample_values:
+          - January
+          - February
+      - name: DAY_OF_WEEK
+        description: Day of week (0=Sunday, 6=Saturday)
+        expr: DAY_OF_WEEK
+        data_type: NUMBER(1,0)
+      - name: DAY_NAME
+        description: Name of the day
+        expr: DAY_NAME
+        data_type: VARCHAR(20)
+        sample_values:
+          - Monday
+          - Tuesday
+      - name: IS_WEEKEND
+        description: Whether date falls on weekend
+        expr: IS_WEEKEND
+        data_type: BOOLEAN
+      - name: IS_HOLIDAY
+        description: Whether date is a holiday
+        expr: IS_HOLIDAY
+        data_type: BOOLEAN
+    time_dimensions:
+      - name: FULL_DATE
+        description: Full calendar date
+        expr: FULL_DATE
+        data_type: DATE
+    facts: []
+    primary_key:
+      columns:
+        - TIME_KEY
+
+relationships:
+  - name: ETRM_TO_BOOK
+    left_table: FCT_ETRM_POSITIONS
+    relationship_columns:
+      - left_column: BOOK_KEY
+        right_column: BOOK_KEY
+    right_table: DIM_TRADING_BOOK
+
+  - name: ETRM_TO_INSTRUMENT
+    left_table: FCT_ETRM_POSITIONS
+    relationship_columns:
+      - left_column: INSTRUMENT_KEY
+        right_column: INSTRUMENT_KEY
+    right_table: DIM_INSTRUMENT
+
+  - name: ETRM_TO_DELIVERY_POINT
+    left_table: FCT_ETRM_POSITIONS
+    relationship_columns:
+      - left_column: TRADE_DELIVERY_POINT_KEY
+        right_column: DELIVERY_POINT_KEY
+    right_table: DIM_DELIVERY_POINT
+
+  - name: ETRM_TO_DELIVERY_TIME
+    left_table: FCT_ETRM_POSITIONS
+    relationship_columns:
+      - left_column: DELIVERY_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: ETRM_TO_SNAPSHOT_TIME
+    left_table: FCT_ETRM_POSITIONS
+    relationship_columns:
+      - left_column: SNAPSHOT_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: FORECAST_TO_ASSET
+    left_table: FCT_PRODUCTION_FORECAST
+    relationship_columns:
+      - left_column: ASSET_KEY
+        right_column: ASSET_KEY
+    right_table: DIM_ASSET
+
+  - name: FORECAST_TO_VERSION
+    left_table: FCT_PRODUCTION_FORECAST
+    relationship_columns:
+      - left_column: FORECAST_VERSION_KEY
+        right_column: FORECAST_VERSION_KEY
+    right_table: DIM_FORECAST_VERSION
+
+  - name: FORECAST_TO_DELIVERY_TIME
+    left_table: FCT_PRODUCTION_FORECAST
+    relationship_columns:
+      - left_column: DELIVERY_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: CURVE_TO_DELIVERY_POINT
+    left_table: DIM_CURVE
+    relationship_columns:
+      - left_column: ASSOCIATED_DELIVERY_POINT_KEY
+        right_column: DELIVERY_POINT_KEY
+    right_table: DIM_DELIVERY_POINT
+
+  - name: CURVE_DATA_TO_CURVE
+    left_table: FCT_CURVE_DATA
+    relationship_columns:
+      - left_column: CURVE_KEY
+        right_column: CURVE_KEY
+    right_table: DIM_CURVE
+
+  - name: CURVE_DATA_TO_DELIVERY_TIME
+    left_table: FCT_CURVE_DATA
+    relationship_columns:
+      - left_column: DELIVERY_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: CURVE_DATA_TO_SNAPSHOT_TIME
+    left_table: FCT_CURVE_DATA
+    relationship_columns:
+      - left_column: SNAPSHOT_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: PHYSICAL_TO_DELIVERY_POINT
+    left_table: FCT_PHYSICAL_DELIVERY
+    relationship_columns:
+      - left_column: PHYSICAL_DELIVERY_POINT_KEY
+        right_column: DELIVERY_POINT_KEY
+    right_table: DIM_DELIVERY_POINT
+
+  - name: PHYSICAL_TO_INTERVAL_TIME
+    left_table: FCT_PHYSICAL_DELIVERY
+    relationship_columns:
+      - left_column: INTERVAL_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: PHYSICAL_TO_SNAPSHOT_TIME
+    left_table: FCT_PHYSICAL_DELIVERY
+    relationship_columns:
+      - left_column: SNAPSHOT_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: MISMATCH_TO_BOOK
+    left_table: FCT_MISMATCH_RISK
+    relationship_columns:
+      - left_column: BOOK_KEY
+        right_column: BOOK_KEY
+    right_table: DIM_TRADING_BOOK
+
+  - name: MISMATCH_TO_DELIVERY_TIME
+    left_table: FCT_MISMATCH_RISK
+    relationship_columns:
+      - left_column: DELIVERY_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: MISMATCH_TO_DELIVERY_POINT
+    left_table: FCT_MISMATCH_RISK
+    relationship_columns:
+      - left_column: TRADE_DELIVERY_POINT_KEY
+        right_column: DELIVERY_POINT_KEY
+    right_table: DIM_DELIVERY_POINT
+
+  - name: MISMATCH_TO_FORECAST_VERSION
+    left_table: FCT_MISMATCH_RISK
+    relationship_columns:
+      - left_column: FORECAST_VERSION_KEY
+        right_column: FORECAST_VERSION_KEY
+    right_table: DIM_FORECAST_VERSION
+
+  - name: ASSET_TO_SITE
+    left_table: DIM_ASSET
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: WEATHER_TO_SITE
+    left_table: FCT_WEATHER_FORECAST
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: WEATHER_TO_TIME
+    left_table: FCT_WEATHER_FORECAST
+    relationship_columns:
+      - left_column: TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME

@@ -1,0 +1,304 @@
+semantic_model:
+  name: "Hedge Mismatch Early Warning System"
+  description: "Compares financial hedge positions against physical production forecasts to identify volume mismatch risks. Provides early warning when hedged volumes diverge from deliverable production."
+  
+tables:
+  - name: DIM_TRADING_BOOK
+    description: "Trading books and portfolios organized by commodity and strategy"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_TRADING_BOOK
+    dimensions:
+      - name: BOOK_KEY
+        description: "Unique identifier for each trading book"
+        data_type: NUMBER
+        unique: true
+      - name: BOOK_NAME
+        synonyms: ["book", "portfolio", "trading book"]
+        description: "Name of the trading book"
+        data_type: VARCHAR
+      - name: TRADER_NAME
+        synonyms: ["trader", "portfolio manager"]
+        description: "Name of the responsible trader"
+        data_type: VARCHAR
+      - name: STRATEGY
+        synonyms: ["trading strategy", "approach"]
+        description: "Trading strategy employed"
+        data_type: VARCHAR
+        sample_values: ["Physical Hedging", "Spread Trading", "Basis Trading"]
+      - name: COMMODITY
+        synonyms: ["product", "commodity type"]
+        description: "Commodity being traded"
+        data_type: VARCHAR
+        sample_values: ["Crude Oil", "Natural Gas", "NGL", "Power"]
+    measures:
+      - name: VAR_LIMIT_USD
+        synonyms: ["VaR limit", "risk limit"]
+        description: "Value at Risk limit in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: POSITION_LIMIT_UNITS
+        synonyms: ["position limit", "volume limit"]
+        description: "Position limit in units"
+        aggregation: sum
+        data_type: NUMBER
+
+  - name: FCT_ETRM_POSITIONS
+    description: "Financial hedge positions from ETRM system by book and delivery month"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_ETRM_POSITIONS
+    dimensions:
+      - name: POSITION_TYPE
+        synonyms: ["long or short", "position direction"]
+        description: "Type of position"
+        data_type: VARCHAR
+        sample_values: ["Long", "Short", "Flat"]
+      - name: SNAPSHOT_TIMESTAMP
+        synonyms: ["as of date", "position date"]
+        description: "Date of position snapshot"
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: NOTIONAL_VOLUME
+        synonyms: ["hedged volume", "position volume", "notional"]
+        description: "Notional volume (negative for short positions)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: WEIGHTED_AVG_PRICE
+        synonyms: ["average price", "hedge price"]
+        description: "Weighted average price"
+        aggregation: avg
+        data_type: NUMBER
+      - name: DELTA
+        synonyms: ["price sensitivity", "delta exposure"]
+        description: "Delta (price sensitivity)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: UNREALIZED_PNL_USD
+        synonyms: ["unrealized P&L", "mark to market", "MTM"]
+        description: "Unrealized profit/loss in USD"
+        aggregation: sum
+        data_type: NUMBER
+
+  - name: FCT_PRODUCTION_FORECAST
+    description: "Physical production forecasts with P10/P50/P90 scenarios by asset and month"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PRODUCTION_FORECAST
+    dimensions:
+      - name: VOLUME_UNIT
+        synonyms: ["unit of measure", "UOM"]
+        description: "Unit of volume measurement"
+        data_type: VARCHAR
+      - name: FORECAST_CONFIDENCE
+        synonyms: ["confidence level", "reliability"]
+        description: "Forecast confidence level"
+        data_type: VARCHAR
+        sample_values: ["High", "Medium", "Low"]
+      - name: FORECAST_TIMESTAMP
+        synonyms: ["forecast date", "when forecasted"]
+        description: "Date when forecast was created"
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: P10_VOLUME
+        synonyms: ["low case", "P10", "10th percentile"]
+        description: "10th percentile forecast (low case)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: P50_VOLUME
+        synonyms: ["base case", "P50", "expected volume"]
+        description: "50th percentile forecast (base case)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: P90_VOLUME
+        synonyms: ["high case", "P90", "90th percentile"]
+        description: "90th percentile forecast (high case)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: WEATHER_IMPACT_VOLUME
+        synonyms: ["weather impact", "weather risk"]
+        description: "Expected impact from weather"
+        aggregation: sum
+        data_type: NUMBER
+      - name: OUTAGE_IMPACT_VOLUME
+        synonyms: ["outage impact", "downtime impact"]
+        description: "Expected impact from outages"
+        aggregation: sum
+        data_type: NUMBER
+      - name: ASSUMED_UPTIME_PERCENT
+        synonyms: ["uptime", "availability assumption"]
+        description: "Assumed uptime percentage"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: FCT_MISMATCH_RISK
+    description: "Mismatch analysis comparing hedged volumes vs physical deliverable volumes"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_MISMATCH_RISK
+    dimensions:
+      - name: SIMULATION_RUN_ID
+        synonyms: ["simulation ID", "run ID"]
+        description: "Unique identifier for simulation run"
+        data_type: VARCHAR
+      - name: PRIMARY_RISK_DRIVER
+        synonyms: ["risk driver", "main cause", "key risk"]
+        description: "Primary driver of mismatch risk"
+        data_type: VARCHAR
+      - name: RISK_LEVEL
+        synonyms: ["risk severity", "risk rating"]
+        description: "Risk level classification"
+        data_type: VARCHAR
+        sample_values: ["Low", "Medium", "High", "Critical"]
+      - name: ALERT_TRIGGERED
+        synonyms: ["alert fired", "alert status"]
+        description: "Whether an alert was triggered"
+        data_type: BOOLEAN
+      - name: SIMULATION_TIMESTAMP
+        synonyms: ["analysis date", "when calculated"]
+        description: "Date of mismatch analysis"
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: HEDGED_VOLUME
+        synonyms: ["financial hedge", "hedged position"]
+        description: "Total hedged volume"
+        aggregation: sum
+        data_type: NUMBER
+      - name: P50_DELIVERABLE_VOLUME
+        synonyms: ["expected production", "deliverable volume"]
+        description: "P50 physical deliverable volume"
+        aggregation: sum
+        data_type: NUMBER
+      - name: P10_DELIVERABLE_VOLUME
+        synonyms: ["low case production"]
+        description: "P10 physical deliverable volume (low case)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: P90_DELIVERABLE_VOLUME
+        synonyms: ["high case production"]
+        description: "P90 physical deliverable volume (high case)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: MISMATCH_PROBABILITY
+        synonyms: ["probability of mismatch", "mismatch risk", "P(mismatch)"]
+        description: "Probability of volume mismatch (0-1)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: EXPECTED_MISMATCH_UNITS
+        synonyms: ["expected shortfall", "volume gap"]
+        description: "Expected mismatch in units"
+        aggregation: sum
+        data_type: NUMBER
+      - name: P95_MISMATCH_UNITS
+        synonyms: ["worst case mismatch", "P95 VaR"]
+        description: "P95 mismatch (Value at Risk)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: EXPECTED_PNL_IMPACT_USD
+        synonyms: ["expected P&L impact", "financial impact"]
+        description: "Expected P&L impact in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: VAR_IMPACT_USD
+        synonyms: ["VaR", "value at risk", "worst case cost"]
+        description: "Value at Risk impact in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: WEATHER_CONTRIBUTION_PERCENT
+        synonyms: ["weather contribution", "% from weather"]
+        description: "Percentage contribution from weather"
+        aggregation: avg
+        data_type: NUMBER
+      - name: OUTAGE_CONTRIBUTION_PERCENT
+        synonyms: ["outage contribution", "% from outages"]
+        description: "Percentage contribution from outages"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: FCT_CURVE_DATA
+    description: "Forward curve prices and volatility by delivery month"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_CURVE_DATA
+    dimensions:
+      - name: CONTANGO_BACKWARDATION
+        synonyms: ["curve shape", "market structure"]
+        description: "Curve structure"
+        data_type: VARCHAR
+        sample_values: ["Contango", "Backwardation"]
+      - name: SNAPSHOT_TIMESTAMP
+        synonyms: ["price date", "as of date"]
+        description: "Date of curve snapshot"
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: PRICE
+        synonyms: ["forward price", "curve price"]
+        description: "Forward price"
+        aggregation: avg
+        data_type: NUMBER
+      - name: VOLATILITY
+        synonyms: ["implied vol", "price volatility"]
+        description: "Implied volatility"
+        aggregation: avg
+        data_type: NUMBER
+
+relationships:
+  - name: etrm_to_book
+    left_table: FCT_ETRM_POSITIONS
+    left_column: BOOK_KEY
+    right_table: DIM_TRADING_BOOK
+    right_column: BOOK_KEY
+    relationship_type: many_to_one
+    
+  - name: mismatch_to_book
+    left_table: FCT_MISMATCH_RISK
+    left_column: BOOK_KEY
+    right_table: DIM_TRADING_BOOK
+    right_column: BOOK_KEY
+    relationship_type: many_to_one
+    
+  - name: forecast_to_asset
+    left_table: FCT_PRODUCTION_FORECAST
+    left_column: ASSET_KEY
+    right_table: DIM_ASSET
+    right_column: ASSET_KEY
+    relationship_type: many_to_one
+
+verified_queries:
+  - name: "High risk mismatch books"
+    question: "Which trading books have high mismatch risk?"
+    sql: |
+      SELECT 
+        b.BOOK_NAME,
+        b.TRADER_NAME,
+        COUNT(*) as HIGH_RISK_MONTHS,
+        AVG(m.MISMATCH_PROBABILITY) as AVG_MISMATCH_PROB,
+        SUM(m.EXPECTED_PNL_IMPACT_USD) as TOTAL_PNL_IMPACT
+      FROM FCT_MISMATCH_RISK m
+      JOIN DIM_TRADING_BOOK b ON m.BOOK_KEY = b.BOOK_KEY
+      WHERE m.RISK_LEVEL = 'High'
+        OR m.ALERT_TRIGGERED = TRUE
+      GROUP BY b.BOOK_NAME, b.TRADER_NAME
+      ORDER BY HIGH_RISK_MONTHS DESC
+    verified_result: true
+    
+  - name: "Mismatch by risk driver"
+    question: "What are the main drivers of hedge mismatch risk?"
+    sql: |
+      SELECT 
+        PRIMARY_RISK_DRIVER,
+        COUNT(*) as OCCURRENCE_COUNT,
+        AVG(MISMATCH_PROBABILITY) as AVG_PROBABILITY,
+        SUM(EXPECTED_MISMATCH_UNITS) as TOTAL_VOLUME_RISK,
+        SUM(EXPECTED_PNL_IMPACT_USD) as TOTAL_FINANCIAL_IMPACT
+      FROM FCT_MISMATCH_RISK
+      WHERE RISK_LEVEL IN ('Medium', 'High', 'Critical')
+      GROUP BY PRIMARY_RISK_DRIVER
+      ORDER BY OCCURRENCE_COUNT DESC
+    verified_result: true
+

@@ -1,0 +1,1120 @@
+name: OG_ASSET_INVENTORY_READINESS
+
+tables:
+  - name: DIM_ASSET
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_ASSET
+    dimensions:
+      - name: ASSET_KEY
+        description: Unique identifier for each physical asset
+        expr: ASSET_KEY
+        data_type: NUMBER(38,0)
+      - name: ASSET_ID
+        description: Business identifier for the asset
+        expr: ASSET_ID
+        data_type: VARCHAR(50)
+        sample_values:
+          - ASSET_PERM_PUMP_001
+          - ASSET_BAKKEN_COMP_001
+      - name: ASSET_NAME
+        description: Descriptive name of the physical asset
+        expr: ASSET_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Midland Basin Injection Pump
+          - Delaware Compression Unit A
+      - name: ASSET_TYPE
+        description: Type of physical asset
+        expr: ASSET_TYPE
+        data_type: VARCHAR(100)
+        sample_values:
+          - Pump
+          - Compressor
+          - Turbine
+          - Well
+          - Pipeline
+      - name: ASSET_CATEGORY
+        description: High-level category of asset
+        expr: ASSET_CATEGORY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Production
+          - Transportation
+          - Processing
+      - name: MODEL_NUMBER
+        description: Manufacturer model number
+        expr: MODEL_NUMBER
+        data_type: VARCHAR(100)
+      - name: MANUFACTURER
+        description: Asset manufacturer
+        expr: MANUFACTURER
+        data_type: VARCHAR(200)
+      - name: SERIAL_NUMBER
+        description: Asset serial number
+        expr: SERIAL_NUMBER
+        data_type: VARCHAR(100)
+      - name: CAPACITY_UNIT
+        description: Unit of measure for asset capacity
+        expr: CAPACITY_UNIT
+        data_type: VARCHAR(50)
+      - name: ASSET_STATUS
+        description: Current operational status of the asset
+        expr: ASSET_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Active
+          - Maintenance
+          - Decommissioned
+    time_dimensions:
+      - name: INSTALL_DATE
+        description: Date when asset was installed
+        expr: INSTALL_DATE
+        data_type: DATE
+      - name: COMMISSIONING_DATE
+        description: Date when asset was commissioned
+        expr: COMMISSIONING_DATE
+        data_type: DATE
+    facts:
+      - name: NAMEPLATE_CAPACITY
+        description: Nameplate capacity of the asset
+        expr: NAMEPLATE_CAPACITY
+        data_type: NUMBER(18,4)
+      - name: CRITICALITY_SCORE
+        description: Asset criticality score from 0-100
+        expr: CRITICALITY_SCORE
+        data_type: NUMBER(3,0)
+        sample_values:
+          - '95'
+          - '75'
+      - name: LATITUDE
+        description: Latitude coordinate of asset location
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of asset location
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+    primary_key:
+      columns:
+        - ASSET_KEY
+
+  - name: DIM_SITE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_SITE
+    dimensions:
+      - name: SITE_KEY
+        description: Unique identifier for each site location
+        expr: SITE_KEY
+        data_type: NUMBER(38,0)
+      - name: SITE_ID
+        description: Business identifier for the site
+        expr: SITE_ID
+        data_type: VARCHAR(50)
+      - name: SITE_NAME
+        description: Descriptive name of the site
+        expr: SITE_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Midland Production Facility
+          - Delaware Basin Processing Plant
+      - name: SITE_TYPE
+        description: Type of site
+        expr: SITE_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Project
+          - Production
+          - Warehouse
+      - name: REGION
+        description: Geographic region or basin
+        expr: REGION
+        data_type: VARCHAR(100)
+        sample_values:
+          - Permian Basin
+          - Bakken Formation
+          - Eagle Ford Shale
+      - name: COUNTRY
+        description: Country where site is located
+        expr: COUNTRY
+        data_type: VARCHAR(100)
+      - name: STATE_PROVINCE
+        description: State or province
+        expr: STATE_PROVINCE
+        data_type: VARCHAR(100)
+      - name: SITE_STATUS
+        description: Current operational status
+        expr: SITE_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Active
+          - Under Construction
+    facts:
+      - name: LATITUDE
+        description: Latitude coordinate of site location
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of site location
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+      - name: SITE_READINESS_SCORE
+        description: Site operational readiness score (0-100)
+        expr: SITE_READINESS_SCORE
+        data_type: NUMBER(3,0)
+    primary_key:
+      columns:
+        - SITE_KEY
+
+  - name: DIM_WAREHOUSE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_WAREHOUSE
+    dimensions:
+      - name: WAREHOUSE_KEY
+        description: Unique identifier for each warehouse
+        expr: WAREHOUSE_KEY
+        data_type: NUMBER(38,0)
+      - name: WAREHOUSE_ID
+        description: Business identifier for the warehouse
+        expr: WAREHOUSE_ID
+        data_type: VARCHAR(50)
+      - name: WAREHOUSE_NAME
+        description: Descriptive name of the warehouse
+        expr: WAREHOUSE_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Midland Distribution Center
+          - Odessa Field Depot
+      - name: WAREHOUSE_TYPE
+        description: Type of warehouse facility
+        expr: WAREHOUSE_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Distribution Center
+          - Field Depot
+          - Regional Hub
+      - name: ADDRESS
+        description: Physical address of warehouse
+        expr: ADDRESS
+        data_type: VARCHAR(500)
+    facts:
+      - name: LATITUDE
+        description: Latitude coordinate of warehouse location
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of warehouse location
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+      - name: TOTAL_CAPACITY_SQ_FT
+        description: Total storage capacity in square feet
+        expr: TOTAL_CAPACITY_SQ_FT
+        data_type: NUMBER(18,2)
+      - name: CURRENT_UTILIZATION_PERCENT
+        description: Current warehouse utilization percentage
+        expr: CURRENT_UTILIZATION_PERCENT
+        data_type: NUMBER(5,2)
+    primary_key:
+      columns:
+        - WAREHOUSE_KEY
+
+  - name: DIM_SKU
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_SKU
+    dimensions:
+      - name: SKU_KEY
+        description: Unique identifier for each spare part
+        expr: SKU_KEY
+        data_type: NUMBER(38,0)
+      - name: SKU_ID
+        description: Business identifier for the SKU
+        expr: SKU_ID
+        data_type: VARCHAR(50)
+      - name: PART_NUMBER
+        description: Manufacturer part number
+        expr: PART_NUMBER
+        data_type: VARCHAR(100)
+        sample_values:
+          - PUMP-SEAL-1234
+          - COMP-BEARING-5678
+      - name: PART_NAME
+        description: Descriptive name of the part
+        expr: PART_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - High-Pressure Pump Seal
+          - Compressor Bearing Assembly
+      - name: DESCRIPTION
+        description: Detailed part description
+        expr: DESCRIPTION
+        data_type: VARCHAR(1000)
+      - name: PART_CATEGORY
+        description: High-level category of the part
+        expr: PART_CATEGORY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Rotating Equipment
+          - Valves
+          - Electrical
+          - Instrumentation
+      - name: PART_SUBCATEGORY
+        description: More specific part subcategory
+        expr: PART_SUBCATEGORY
+        data_type: VARCHAR(100)
+      - name: CRITICALITY
+        description: Part criticality level
+        expr: CRITICALITY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Critical
+          - Important
+          - Standard
+      - name: MANUFACTURER
+        description: Part manufacturer
+        expr: MANUFACTURER
+        data_type: VARCHAR(200)
+      - name: VENDOR
+        description: Part vendor or supplier
+        expr: VENDOR
+        data_type: VARCHAR(200)
+      - name: UNIT_OF_MEASURE
+        description: Unit of measure for the part
+        expr: UNIT_OF_MEASURE
+        data_type: VARCHAR(50)
+    facts:
+      - name: WEIGHT_LBS
+        description: Part weight in pounds
+        expr: WEIGHT_LBS
+        data_type: NUMBER(18,4)
+      - name: UNIT_COST_USD
+        description: Cost per unit in USD
+        expr: UNIT_COST_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '2500.00'
+          - '850.00'
+      - name: LEAD_TIME_DAYS
+        description: Supplier lead time in days
+        expr: LEAD_TIME_DAYS
+        data_type: NUMBER(10,0)
+      - name: REORDER_POINT
+        description: Inventory reorder point quantity
+        expr: REORDER_POINT
+        data_type: NUMBER(10,0)
+      - name: ECONOMIC_ORDER_QUANTITY
+        description: Economic order quantity for restocking
+        expr: ECONOMIC_ORDER_QUANTITY
+        data_type: NUMBER(10,0)
+    primary_key:
+      columns:
+        - SKU_KEY
+
+  - name: DIM_BOM
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_BOM
+    dimensions:
+      - name: BOM_KEY
+        description: Unique identifier for each bill of materials entry
+        expr: BOM_KEY
+        data_type: NUMBER(38,0)
+      - name: ASSET_TYPE
+        description: Type of asset this BOM entry applies to
+        expr: ASSET_TYPE
+        data_type: VARCHAR(100)
+      - name: CRITICALITY_LEVEL
+        description: Criticality level of this part for the asset
+        expr: CRITICALITY_LEVEL
+        data_type: VARCHAR(50)
+        sample_values:
+          - Critical
+          - High
+          - Medium
+          - Low
+    facts:
+      - name: REQUIRED_QUANTITY
+        description: Required quantity of part per asset
+        expr: REQUIRED_QUANTITY
+        data_type: NUMBER(10,2)
+      - name: MTBF_HOURS
+        description: Mean time between failures in hours
+        expr: MTBF_HOURS
+        data_type: NUMBER(18,2)
+      - name: TYPICAL_REPLACEMENT_INTERVAL_DAYS
+        description: Typical replacement interval in days
+        expr: TYPICAL_REPLACEMENT_INTERVAL_DAYS
+        data_type: NUMBER(10,0)
+    primary_key:
+      columns:
+        - BOM_KEY
+
+  - name: DIM_FAILURE_TYPE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_FAILURE_TYPE
+    dimensions:
+      - name: FAILURE_TYPE_KEY
+        description: Unique identifier for failure type
+        expr: FAILURE_TYPE_KEY
+        data_type: NUMBER(38,0)
+      - name: FAILURE_CODE
+        description: Business code for the failure type
+        expr: FAILURE_CODE
+        data_type: VARCHAR(50)
+      - name: FAILURE_NAME
+        description: Descriptive name of the failure type
+        expr: FAILURE_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Bearing Failure
+          - Seal Leakage
+          - Electrical Fault
+      - name: FAILURE_CATEGORY
+        description: High-level category of failure
+        expr: FAILURE_CATEGORY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Mechanical
+          - Electrical
+          - Instrumentation
+          - Structural
+      - name: DESCRIPTION
+        description: Detailed description of the failure type
+        expr: DESCRIPTION
+        data_type: VARCHAR(1000)
+      - name: TYPICAL_CAUSES
+        description: Typical causes of this failure type
+        expr: TYPICAL_CAUSES
+        data_type: VARCHAR(1000)
+      - name: IS_WEATHER_RELATED
+        description: Whether failure is weather-related (TRUE/FALSE)
+        expr: IS_WEATHER_RELATED
+        data_type: BOOLEAN
+        sample_values:
+          - 'TRUE'
+          - 'FALSE'
+    facts: []
+    primary_key:
+      columns:
+        - FAILURE_TYPE_KEY
+
+  - name: DIM_PRODUCTION_UNIT
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_PRODUCTION_UNIT
+    dimensions:
+      - name: PRODUCTION_UNIT_KEY
+        description: Unique identifier for each production unit
+        expr: PRODUCTION_UNIT_KEY
+        data_type: NUMBER(38,0)
+      - name: PRODUCTION_UNIT_ID
+        description: Business identifier for the production unit
+        expr: PRODUCTION_UNIT_ID
+        data_type: VARCHAR(50)
+      - name: UNIT_NAME
+        description: Descriptive name of the production unit
+        expr: UNIT_NAME
+        data_type: VARCHAR(200)
+        sample_values:
+          - Midland Well Pad Alpha
+          - Delaware Processing Train 1
+      - name: UNIT_TYPE
+        description: Type of production unit
+        expr: UNIT_TYPE
+        data_type: VARCHAR(100)
+        sample_values:
+          - Well
+          - Production Line
+          - Processing Plant
+          - Pipeline
+      - name: PRODUCT_FAMILY
+        description: Type of product produced
+        expr: PRODUCT_FAMILY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Crude Oil
+          - Natural Gas
+          - NGL
+          - Refined Products
+      - name: CAPACITY_UNIT
+        description: Unit of measure for capacity
+        expr: CAPACITY_UNIT
+        data_type: VARCHAR(50)
+        sample_values:
+          - BBL/day
+          - MCF/day
+          - BBL/hour
+      - name: UNIT_STATUS
+        description: Current operational status of the unit
+        expr: UNIT_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Active
+          - Maintenance
+          - Decommissioned
+    facts:
+      - name: NOMINAL_RATE_UNITS_PER_HOUR
+        description: Nominal production rate per hour
+        expr: NOMINAL_RATE_UNITS_PER_HOUR
+        data_type: NUMBER(18,4)
+      - name: LATITUDE
+        description: Latitude coordinate of production unit location
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of production unit location
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+    primary_key:
+      columns:
+        - PRODUCTION_UNIT_KEY
+
+  - name: DIM_IMPACT_MODE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_IMPACT_MODE
+    dimensions:
+      - name: IMPACT_MODE_KEY
+        description: Unique identifier for impact mode
+        expr: IMPACT_MODE_KEY
+        data_type: NUMBER(38,0)
+      - name: IMPACT_MODE_CODE
+        description: Business code for the impact mode
+        expr: IMPACT_MODE_CODE
+        data_type: VARCHAR(50)
+      - name: MODE_NAME
+        description: Descriptive name of the impact mode
+        expr: MODE_NAME
+        data_type: VARCHAR(200)
+      - name: DESCRIPTION
+        description: Detailed description of the impact mode
+        expr: DESCRIPTION
+        data_type: VARCHAR(1000)
+      - name: OEE_CATEGORY
+        description: Overall Equipment Effectiveness category
+        expr: OEE_CATEGORY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Availability
+          - Performance
+          - Quality
+      - name: SEVERITY
+        description: Severity level of the impact
+        expr: SEVERITY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Full Stop
+          - Major
+          - Minor
+    facts: []
+    primary_key:
+      columns:
+        - IMPACT_MODE_KEY
+
+  - name: FCT_ASSET_TELEMETRY
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_ASSET_TELEMETRY
+    dimensions:
+      - name: TELEMETRY_KEY
+        description: Unique identifier for each telemetry reading
+        expr: TELEMETRY_KEY
+        data_type: NUMBER(38,0)
+      - name: OPERATIONAL_STATUS
+        description: Current operational status of the asset
+        expr: OPERATIONAL_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Running
+          - Idle
+          - Alarmed
+          - Shutdown
+    time_dimensions:
+      - name: READING_TIMESTAMP
+        description: Timestamp when telemetry reading was taken
+        expr: READING_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: VIBRATION_MM_S
+        description: Vibration measurement in millimeters per second
+        expr: VIBRATION_MM_S
+        data_type: NUMBER(10,4)
+      - name: TEMPERATURE_C
+        description: Temperature in degrees Celsius
+        expr: TEMPERATURE_C
+        data_type: NUMBER(10,2)
+      - name: PRESSURE_PSI
+        description: Pressure in pounds per square inch
+        expr: PRESSURE_PSI
+        data_type: NUMBER(10,2)
+      - name: FLOW_RATE
+        description: Flow rate measurement
+        expr: FLOW_RATE
+        data_type: NUMBER(18,4)
+      - name: POWER_CONSUMPTION_KW
+        description: Power consumption in kilowatts
+        expr: POWER_CONSUMPTION_KW
+        data_type: NUMBER(18,4)
+      - name: RPM
+        description: Revolutions per minute
+        expr: RPM
+        data_type: NUMBER(10,2)
+      - name: ALARM_COUNT
+        description: Number of active alarms
+        expr: ALARM_COUNT
+        data_type: NUMBER(5,0)
+      - name: WARNING_COUNT
+        description: Number of active warnings
+        expr: WARNING_COUNT
+        data_type: NUMBER(5,0)
+      - name: UPTIME_SECONDS
+        description: Uptime in seconds
+        expr: UPTIME_SECONDS
+        data_type: NUMBER(10,0)
+    primary_key:
+      columns:
+        - TELEMETRY_KEY
+
+  - name: FCT_MAINTENANCE_HISTORY
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_MAINTENANCE_HISTORY
+    dimensions:
+      - name: MAINTENANCE_KEY
+        description: Unique identifier for each maintenance event
+        expr: MAINTENANCE_KEY
+        data_type: NUMBER(38,0)
+      - name: EVENT_TYPE
+        description: Type of maintenance event
+        expr: EVENT_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Failure
+          - Preventive Maintenance
+          - Inspection
+      - name: FAILURE_DESCRIPTION
+        description: Description of the failure
+        expr: FAILURE_DESCRIPTION
+        data_type: VARCHAR(2000)
+      - name: ROOT_CAUSE
+        description: Root cause of the failure
+        expr: ROOT_CAUSE
+        data_type: VARCHAR(1000)
+      - name: CORRECTIVE_ACTION
+        description: Corrective actions taken
+        expr: CORRECTIVE_ACTION
+        data_type: VARCHAR(2000)
+      - name: PARTS_USED
+        description: Parts used in the repair
+        expr: PARTS_USED
+        data_type: VARCHAR(1000)
+    time_dimensions:
+      - name: FAILURE_DATE
+        description: Date when failure occurred
+        expr: FAILURE_DATE
+        data_type: DATE
+      - name: REPAIR_DATE
+        description: Date when repair was completed
+        expr: REPAIR_DATE
+        data_type: DATE
+      - name: EVENT_RECORDED_AT
+        description: Timestamp when event was recorded
+        expr: EVENT_RECORDED_AT
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: DOWNTIME_HOURS
+        description: Total downtime in hours
+        expr: DOWNTIME_HOURS
+        data_type: NUMBER(10,2)
+        sample_values:
+          - '12.50'
+          - '48.00'
+      - name: MAINTENANCE_COST_USD
+        description: Cost of maintenance in USD
+        expr: MAINTENANCE_COST_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '15000.00'
+          - '52000.00'
+      - name: ESTIMATED_DERATE_PERCENT
+        description: Estimated derate percentage (0-1 scale)
+        expr: ESTIMATED_DERATE_PERCENT
+        data_type: NUMBER(5,4)
+      - name: ESTIMATED_LOST_VOLUME_UNITS
+        description: Estimated lost production volume
+        expr: ESTIMATED_LOST_VOLUME_UNITS
+        data_type: NUMBER(18,4)
+      - name: RESTORATION_TIME_HOURS
+        description: Time to restore to normal operation in hours
+        expr: RESTORATION_TIME_HOURS
+        data_type: NUMBER(10,2)
+      - name: WEATHER_SEVERITY_AT_FAILURE
+        description: Weather severity at time of failure (0-100)
+        expr: WEATHER_SEVERITY_AT_FAILURE
+        data_type: NUMBER(3,0)
+      - name: TEMPERATURE_C_AT_FAILURE
+        description: Temperature in Celsius at time of failure
+        expr: TEMPERATURE_C_AT_FAILURE
+        data_type: NUMBER(10,2)
+    primary_key:
+      columns:
+        - MAINTENANCE_KEY
+
+  - name: FCT_INVENTORY_ON_HAND
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_INVENTORY_ON_HAND
+    dimensions:
+      - name: INVENTORY_KEY
+        description: Unique identifier for each inventory snapshot
+        expr: INVENTORY_KEY
+        data_type: NUMBER(38,0)
+      - name: REORDER_NEEDED
+        description: Whether reorder is needed (TRUE/FALSE)
+        expr: REORDER_NEEDED
+        data_type: BOOLEAN
+      - name: STOCKOUT_RISK
+        description: Risk level of stockout
+        expr: STOCKOUT_RISK
+        data_type: VARCHAR(50)
+        sample_values:
+          - High
+          - Medium
+          - Low
+          - None
+    time_dimensions:
+      - name: SNAPSHOT_TIMESTAMP
+        description: Timestamp of inventory snapshot
+        expr: SNAPSHOT_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: ON_HAND_QUANTITY
+        description: Quantity currently on hand
+        expr: ON_HAND_QUANTITY
+        data_type: NUMBER(18,4)
+      - name: ON_ORDER_QUANTITY
+        description: Quantity currently on order
+        expr: ON_ORDER_QUANTITY
+        data_type: NUMBER(18,4)
+      - name: ALLOCATED_QUANTITY
+        description: Quantity allocated to work orders
+        expr: ALLOCATED_QUANTITY
+        data_type: NUMBER(18,4)
+      - name: AVAILABLE_QUANTITY
+        description: Quantity available for use
+        expr: AVAILABLE_QUANTITY
+        data_type: NUMBER(18,4)
+      - name: TOTAL_VALUE_USD
+        description: Total inventory value in USD
+        expr: TOTAL_VALUE_USD
+        data_type: NUMBER(18,2)
+        sample_values:
+          - '125000.00'
+          - '85000.00'
+      - name: DAYS_OF_SUPPLY
+        description: Days of supply remaining
+        expr: DAYS_OF_SUPPLY
+        data_type: NUMBER(10,2)
+    primary_key:
+      columns:
+        - INVENTORY_KEY
+
+  - name: FCT_PRODUCTION_VOLUME
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PRODUCTION_VOLUME
+    dimensions:
+      - name: PRODUCTION_KEY
+        description: Unique identifier for each production record
+        expr: PRODUCTION_KEY
+        data_type: NUMBER(38,0)
+    time_dimensions:
+      - name: PRODUCTION_TIMESTAMP
+        description: Timestamp of production measurement
+        expr: PRODUCTION_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: NOMINAL_RATE_UNITS_PER_HOUR
+        description: Nominal production rate per hour
+        expr: NOMINAL_RATE_UNITS_PER_HOUR
+        data_type: NUMBER(18,4)
+      - name: PLANNED_VOLUME_UNITS
+        description: Planned production volume
+        expr: PLANNED_VOLUME_UNITS
+        data_type: NUMBER(18,4)
+      - name: ACTUAL_VOLUME_UNITS
+        description: Actual production volume
+        expr: ACTUAL_VOLUME_UNITS
+        data_type: NUMBER(18,4)
+      - name: SCRAP_UNITS
+        description: Scrap volume
+        expr: SCRAP_UNITS
+        data_type: NUMBER(18,4)
+      - name: FIRST_PASS_YIELD_PERCENT
+        description: First pass yield percentage
+        expr: FIRST_PASS_YIELD_PERCENT
+        data_type: NUMBER(5,2)
+      - name: AVAILABILITY_SECONDS
+        description: Availability in seconds
+        expr: AVAILABILITY_SECONDS
+        data_type: NUMBER(10,0)
+      - name: PERFORMANCE_RATE_PERCENT
+        description: Performance rate percentage
+        expr: PERFORMANCE_RATE_PERCENT
+        data_type: NUMBER(5,2)
+      - name: QUALITY_PERCENT
+        description: Quality percentage
+        expr: QUALITY_PERCENT
+        data_type: NUMBER(5,2)
+      - name: OEE_PERCENT
+        description: Overall Equipment Effectiveness percentage
+        expr: OEE_PERCENT
+        data_type: NUMBER(5,2)
+    primary_key:
+      columns:
+        - PRODUCTION_KEY
+
+  - name: FCT_ASSET_IMPACT
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_ASSET_IMPACT
+    dimensions:
+      - name: IMPACT_KEY
+        description: Unique identifier for each impact record
+        expr: IMPACT_KEY
+        data_type: NUMBER(38,0)
+    time_dimensions:
+      - name: IMPACT_TIMESTAMP
+        description: Timestamp of impact measurement
+        expr: IMPACT_TIMESTAMP
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: DERATE_PERCENT
+        description: Derate percentage (0-1 scale, where 1 = full stop)
+        expr: DERATE_PERCENT
+        data_type: NUMBER(5,4)
+      - name: LOST_VOLUME_UNITS
+        description: Lost production volume in units
+        expr: LOST_VOLUME_UNITS
+        data_type: NUMBER(18,4)
+      - name: LOST_TIME_SECONDS
+        description: Lost time in seconds
+        expr: LOST_TIME_SECONDS
+        data_type: NUMBER(10,0)
+      - name: CONSTRAINED_RATE_UNITS_PER_HOUR
+        description: Constrained production rate per hour
+        expr: CONSTRAINED_RATE_UNITS_PER_HOUR
+        data_type: NUMBER(18,4)
+      - name: ATTRIBUTION_CONFIDENCE
+        description: Confidence in impact attribution (0-1 scale)
+        expr: ATTRIBUTION_CONFIDENCE
+        data_type: NUMBER(5,4)
+    primary_key:
+      columns:
+        - IMPACT_KEY
+
+  - name: FCT_WEATHER_FORECAST
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_WEATHER_FORECAST
+    dimensions:
+      - name: FORECAST_KEY
+        description: Unique identifier for each weather forecast record
+        expr: FORECAST_KEY
+        data_type: NUMBER(38,0)
+      - name: WEATHER_CONDITION
+        description: Categorical weather condition
+        expr: WEATHER_CONDITION
+        data_type: VARCHAR(100)
+        sample_values:
+          - Clear
+          - Rain
+          - Hurricane
+          - Extreme Cold
+      - name: WEATHER_CATEGORY
+        description: Weather severity classification
+        expr: WEATHER_CATEGORY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Normal
+          - Severe
+          - Extreme
+    time_dimensions:
+      - name: FORECAST_RUN_TIME
+        description: Timestamp when the forecast was generated
+        expr: FORECAST_RUN_TIME
+        data_type: TIMESTAMP_NTZ
+    facts:
+      - name: TEMPERATURE_C
+        description: Temperature in degrees Celsius
+        expr: TEMPERATURE_C
+        data_type: NUMBER(6,2)
+      - name: TEMPERATURE_F
+        description: Temperature in degrees Fahrenheit
+        expr: TEMPERATURE_F
+        data_type: NUMBER(6,2)
+      - name: PRECIPITATION_MM
+        description: Precipitation amount in millimeters
+        expr: PRECIPITATION_MM
+        data_type: NUMBER(8,2)
+      - name: WIND_SPEED_KPH
+        description: Wind speed in kilometers per hour
+        expr: WIND_SPEED_KPH
+        data_type: NUMBER(6,2)
+      - name: WIND_SPEED_MPH
+        description: Wind speed in miles per hour
+        expr: WIND_SPEED_MPH
+        data_type: NUMBER(6,2)
+      - name: HUMIDITY_PERCENT
+        description: Relative humidity percentage
+        expr: HUMIDITY_PERCENT
+        data_type: NUMBER(5,2)
+      - name: LIGHTNING_DENSITY
+        description: Lightning strike density (strikes per square kilometer)
+        expr: LIGHTNING_DENSITY
+        data_type: NUMBER(6,2)
+      - name: ICING_PROBABILITY
+        description: Probability of icing conditions (0-1 scale)
+        expr: ICING_PROBABILITY
+        data_type: NUMBER(4,3)
+      - name: FREEZE_PROBABILITY
+        description: Probability of freezing conditions (0-1 scale)
+        expr: FREEZE_PROBABILITY
+        data_type: NUMBER(4,3)
+      - name: STORM_SEVERITY_SCORE
+        description: Storm severity score from 0-100
+        expr: STORM_SEVERITY_SCORE
+        data_type: NUMBER(5,2)
+      - name: WEATHER_SEVERITY_SCORE
+        description: Overall weather severity score from 0-100
+        expr: WEATHER_SEVERITY_SCORE
+        data_type: NUMBER(5,2)
+    primary_key:
+      columns:
+        - FORECAST_KEY
+
+  - name: DIM_TIME
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_TIME
+    dimensions:
+      - name: TIME_KEY
+        description: Unique identifier for each date
+        expr: TIME_KEY
+        data_type: NUMBER(38,0)
+      - name: YEAR
+        description: Year (YYYY)
+        expr: YEAR
+        data_type: NUMBER(4,0)
+        sample_values:
+          - '2024'
+          - '2025'
+      - name: QUARTER
+        description: Quarter of year (1-4)
+        expr: QUARTER
+        data_type: NUMBER(1,0)
+      - name: MONTH
+        description: Month number (1-12)
+        expr: MONTH
+        data_type: NUMBER(2,0)
+      - name: MONTH_NAME
+        description: Name of the month
+        expr: MONTH_NAME
+        data_type: VARCHAR(20)
+        sample_values:
+          - January
+          - February
+      - name: DAY_OF_WEEK
+        description: Day of week (0=Sunday, 6=Saturday)
+        expr: DAY_OF_WEEK
+        data_type: NUMBER(1,0)
+      - name: DAY_NAME
+        description: Name of the day
+        expr: DAY_NAME
+        data_type: VARCHAR(20)
+        sample_values:
+          - Monday
+          - Tuesday
+      - name: IS_WEEKEND
+        description: Whether date falls on weekend
+        expr: IS_WEEKEND
+        data_type: BOOLEAN
+      - name: IS_HOLIDAY
+        description: Whether date is a holiday
+        expr: IS_HOLIDAY
+        data_type: BOOLEAN
+    time_dimensions:
+      - name: FULL_DATE
+        description: Full calendar date
+        expr: FULL_DATE
+        data_type: DATE
+    facts: []
+    primary_key:
+      columns:
+        - TIME_KEY
+
+relationships:
+  - name: ASSET_TO_SITE
+    left_table: DIM_ASSET
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: WAREHOUSE_TO_SITE
+    left_table: DIM_WAREHOUSE
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: BOM_TO_SKU
+    left_table: DIM_BOM
+    relationship_columns:
+      - left_column: SKU_KEY
+        right_column: SKU_KEY
+    right_table: DIM_SKU
+
+  - name: PRODUCTION_UNIT_TO_SITE
+    left_table: DIM_PRODUCTION_UNIT
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: TELEMETRY_TO_ASSET
+    left_table: FCT_ASSET_TELEMETRY
+    relationship_columns:
+      - left_column: ASSET_KEY
+        right_column: ASSET_KEY
+    right_table: DIM_ASSET
+
+  - name: TELEMETRY_TO_TIME
+    left_table: FCT_ASSET_TELEMETRY
+    relationship_columns:
+      - left_column: TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: MAINTENANCE_TO_ASSET
+    left_table: FCT_MAINTENANCE_HISTORY
+    relationship_columns:
+      - left_column: ASSET_KEY
+        right_column: ASSET_KEY
+    right_table: DIM_ASSET
+
+  - name: MAINTENANCE_TO_FAILURE_TYPE
+    left_table: FCT_MAINTENANCE_HISTORY
+    relationship_columns:
+      - left_column: FAILURE_TYPE_KEY
+        right_column: FAILURE_TYPE_KEY
+    right_table: DIM_FAILURE_TYPE
+
+  - name: MAINTENANCE_TO_TIME
+    left_table: FCT_MAINTENANCE_HISTORY
+    relationship_columns:
+      - left_column: FAILURE_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: MAINTENANCE_TO_PRODUCTION_UNIT
+    left_table: FCT_MAINTENANCE_HISTORY
+    relationship_columns:
+      - left_column: PRODUCTION_UNIT_KEY
+        right_column: PRODUCTION_UNIT_KEY
+    right_table: DIM_PRODUCTION_UNIT
+
+  - name: INVENTORY_TO_WAREHOUSE
+    left_table: FCT_INVENTORY_ON_HAND
+    relationship_columns:
+      - left_column: WAREHOUSE_KEY
+        right_column: WAREHOUSE_KEY
+    right_table: DIM_WAREHOUSE
+
+  - name: INVENTORY_TO_SKU
+    left_table: FCT_INVENTORY_ON_HAND
+    relationship_columns:
+      - left_column: SKU_KEY
+        right_column: SKU_KEY
+    right_table: DIM_SKU
+
+  - name: INVENTORY_TO_TIME
+    left_table: FCT_INVENTORY_ON_HAND
+    relationship_columns:
+      - left_column: SNAPSHOT_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: PRODUCTION_TO_UNIT
+    left_table: FCT_PRODUCTION_VOLUME
+    relationship_columns:
+      - left_column: PRODUCTION_UNIT_KEY
+        right_column: PRODUCTION_UNIT_KEY
+    right_table: DIM_PRODUCTION_UNIT
+
+  - name: PRODUCTION_TO_TIME
+    left_table: FCT_PRODUCTION_VOLUME
+    relationship_columns:
+      - left_column: TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: IMPACT_TO_ASSET
+    left_table: FCT_ASSET_IMPACT
+    relationship_columns:
+      - left_column: ASSET_KEY
+        right_column: ASSET_KEY
+    right_table: DIM_ASSET
+
+  - name: IMPACT_TO_PRODUCTION_UNIT
+    left_table: FCT_ASSET_IMPACT
+    relationship_columns:
+      - left_column: PRODUCTION_UNIT_KEY
+        right_column: PRODUCTION_UNIT_KEY
+    right_table: DIM_PRODUCTION_UNIT
+
+  - name: IMPACT_TO_TIME
+    left_table: FCT_ASSET_IMPACT
+    relationship_columns:
+      - left_column: TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: IMPACT_TO_MODE
+    left_table: FCT_ASSET_IMPACT
+    relationship_columns:
+      - left_column: IMPACT_MODE_KEY
+        right_column: IMPACT_MODE_KEY
+    right_table: DIM_IMPACT_MODE
+
+  - name: WEATHER_TO_SITE
+    left_table: FCT_WEATHER_FORECAST
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: WEATHER_TO_TIME
+    left_table: FCT_WEATHER_FORECAST
+    relationship_columns:
+      - left_column: TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME

@@ -1,0 +1,462 @@
+name: OG_PROJECT_RISK_ASSESSMENT
+
+tables:
+  - name: DIM_PROJECT
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_PROJECT
+    dimensions:
+      - name: PROJECT_KEY
+        description: Unique identifier for each capital project
+        expr: PROJECT_KEY
+        data_type: NUMBER(38,0)
+      - name: PROJECT_ID
+        description: Business identifier for the project
+        expr: PROJECT_ID
+        data_type: VARCHAR(50)
+        sample_values:
+          - PROJ_PERMIAN_001
+          - PROJ_BAKKEN_001
+      - name: PROJECT_NAME
+        description: Descriptive name of the capital project
+        expr: PROJECT_NAME
+        data_type: VARCHAR(255)
+        sample_values:
+          - Midland Basin Drilling Campaign Phase 2
+          - Delaware Basin Pipeline Extension
+      - name: PROJECT_TYPE
+        description: Type of capital project
+        expr: PROJECT_TYPE
+        data_type: VARCHAR(100)
+        sample_values:
+          - Drilling
+          - Pipeline
+          - Facility Construction
+      - name: PROJECT_STATUS
+        description: Current status of the project
+        expr: PROJECT_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Active
+          - Planning
+          - On Hold
+      - name: PROJECT_MANAGER
+        description: Name of the project manager
+        expr: PROJECT_MANAGER
+        data_type: VARCHAR(100)
+      - name: PORTFOLIO
+        description: Portfolio or business unit grouping
+        expr: PORTFOLIO
+        data_type: VARCHAR(100)
+    time_dimensions:
+      - name: PLANNED_START_DATE
+        description: Planned project start date
+        expr: PLANNED_START_DATE
+        data_type: DATE
+      - name: PLANNED_END_DATE
+        description: Planned project completion date
+        expr: PLANNED_END_DATE
+        data_type: DATE
+    facts:
+      - name: BASELINE_DURATION_DAYS
+        description: Baseline project duration in days
+        expr: BASELINE_DURATION_DAYS
+        data_type: NUMBER(10,0)
+      - name: APPROVED_BUDGET_USD
+        description: Approved project budget in USD
+        expr: APPROVED_BUDGET_USD
+        data_type: NUMBER(15,2)
+        sample_values:
+          - '15000000.00'
+          - '8500000.00'
+      - name: CURRENT_SCHEDULE_VARIANCE_DAYS
+        description: Current schedule variance in days (negative means behind schedule)
+        expr: CURRENT_SCHEDULE_VARIANCE_DAYS
+        data_type: NUMBER(10,2)
+      - name: CURRENT_COST_VARIANCE_USD
+        description: Current cost variance in USD (negative means over budget)
+        expr: CURRENT_COST_VARIANCE_USD
+        data_type: NUMBER(15,2)
+    primary_key:
+      columns:
+        - PROJECT_KEY
+
+  - name: DIM_SITE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_SITE
+    dimensions:
+      - name: SITE_KEY
+        description: Unique identifier for each site location
+        expr: SITE_KEY
+        data_type: NUMBER(38,0)
+      - name: SITE_ID
+        description: Business identifier for the site
+        expr: SITE_ID
+        data_type: VARCHAR(50)
+      - name: SITE_NAME
+        description: Descriptive name of the site
+        expr: SITE_NAME
+        data_type: VARCHAR(255)
+        sample_values:
+          - Midland Drilling Site Alpha
+          - Delaware Basin Production Facility
+      - name: SITE_TYPE
+        description: Type of site
+        expr: SITE_TYPE
+        data_type: VARCHAR(50)
+        sample_values:
+          - Project
+          - Production
+          - Warehouse
+      - name: REGION
+        description: Geographic region or basin
+        expr: REGION
+        data_type: VARCHAR(100)
+        sample_values:
+          - Permian Basin
+          - Bakken Formation
+          - Eagle Ford Shale
+      - name: COUNTRY
+        description: Country where site is located
+        expr: COUNTRY
+        data_type: VARCHAR(100)
+      - name: STATE_PROVINCE
+        description: State or province
+        expr: STATE_PROVINCE
+        data_type: VARCHAR(100)
+      - name: SITE_STATUS
+        description: Current operational status
+        expr: SITE_STATUS
+        data_type: VARCHAR(50)
+        sample_values:
+          - Active
+          - Under Construction
+    facts:
+      - name: LATITUDE
+        description: Latitude coordinate of site location
+        expr: LATITUDE
+        data_type: NUMBER(10,6)
+      - name: LONGITUDE
+        description: Longitude coordinate of site location
+        expr: LONGITUDE
+        data_type: NUMBER(10,6)
+      - name: SITE_READINESS_SCORE
+        description: Site operational readiness score (0-100)
+        expr: SITE_READINESS_SCORE
+        data_type: NUMBER(5,2)
+    primary_key:
+      columns:
+        - SITE_KEY
+
+  - name: FCT_PROJECT_DELAY_EVENT
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PROJECT_DELAY_EVENT
+    dimensions:
+      - name: DELAY_EVENT_KEY
+        description: Unique identifier for each delay event
+        expr: DELAY_EVENT_KEY
+        data_type: NUMBER(38,0)
+      - name: DELAY_DESCRIPTION
+        description: Description of what caused the delay
+        expr: DELAY_DESCRIPTION
+        data_type: VARCHAR(500)
+        sample_values:
+          - Hurricane force winds halted drilling operations
+          - Extreme cold caused equipment failures
+      - name: ROOT_CAUSE_NOTES
+        description: Detailed root cause analysis of the delay
+        expr: ROOT_CAUSE_NOTES
+        data_type: VARCHAR(1000)
+      - name: MITIGATION_ACTIONS
+        description: Actions taken to mitigate or recover from delay
+        expr: MITIGATION_ACTIONS
+        data_type: VARCHAR(1000)
+    time_dimensions:
+      - name: DELAY_START_DATE
+        description: Date when the delay started
+        expr: DELAY_START_DATE
+        data_type: DATE
+      - name: DELAY_END_DATE
+        description: Date when the delay ended
+        expr: DELAY_END_DATE
+        data_type: DATE
+      - name: EVENT_RECORDED_AT
+        description: Timestamp when the event was recorded in the system
+        expr: EVENT_RECORDED_AT
+        data_type: TIMESTAMP_NTZ(9)
+    facts:
+      - name: DELAY_DURATION_DAYS
+        description: Total duration of the delay in days
+        expr: DELAY_DURATION_DAYS
+        data_type: NUMBER(10,2)
+        sample_values:
+          - '2.50'
+          - '5.00'
+      - name: DELAY_COST_USD
+        description: Financial cost of the delay in USD
+        expr: DELAY_COST_USD
+        data_type: NUMBER(15,2)
+        sample_values:
+          - '350000.00'
+          - '875000.00'
+      - name: CRITICAL_PATH_IMPACT_DAYS
+        description: Impact to critical path in days
+        expr: CRITICAL_PATH_IMPACT_DAYS
+        data_type: NUMBER(10,2)
+      - name: PROJECT_COMPLETION_IMPACT_DAYS
+        description: Impact to overall project completion in days
+        expr: PROJECT_COMPLETION_IMPACT_DAYS
+        data_type: NUMBER(10,2)
+      - name: WEATHER_SEVERITY_AT_EVENT
+        description: Weather severity score at time of delay (0-100)
+        expr: WEATHER_SEVERITY_AT_EVENT
+        data_type: NUMBER(5,2)
+      - name: TEMPERATURE_C_AT_EVENT
+        description: Temperature in Celsius at time of delay
+        expr: TEMPERATURE_C_AT_EVENT
+        data_type: NUMBER(6,2)
+      - name: PRECIPITATION_MM_AT_EVENT
+        description: Precipitation in millimeters at time of delay
+        expr: PRECIPITATION_MM_AT_EVENT
+        data_type: NUMBER(8,2)
+      - name: WIND_SPEED_KPH_AT_EVENT
+        description: Wind speed in kilometers per hour at time of delay
+        expr: WIND_SPEED_KPH_AT_EVENT
+        data_type: NUMBER(6,2)
+    primary_key:
+      columns:
+        - DELAY_EVENT_KEY
+
+  - name: DIM_DELAY_TYPE
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_DELAY_TYPE
+    dimensions:
+      - name: DELAY_TYPE_KEY
+        description: Unique identifier for delay type
+        expr: DELAY_TYPE_KEY
+        data_type: NUMBER(38,0)
+      - name: DELAY_CODE
+        description: Business code for the delay type
+        expr: DELAY_CODE
+        data_type: VARCHAR(50)
+      - name: DELAY_CATEGORY
+        description: High-level category of delay
+        expr: DELAY_CATEGORY
+        data_type: VARCHAR(100)
+        sample_values:
+          - Weather
+          - Labor
+          - Material
+          - Equipment
+      - name: DELAY_SUBCATEGORY
+        description: More specific delay subcategory
+        expr: DELAY_SUBCATEGORY
+        data_type: VARCHAR(100)
+      - name: ROOT_CAUSE_DETAIL
+        description: Detailed description of the root cause
+        expr: ROOT_CAUSE_DETAIL
+        data_type: VARCHAR(255)
+      - name: IS_WEATHER_RELATED
+        description: Whether delay is weather-related (TRUE/FALSE)
+        expr: IS_WEATHER_RELATED
+        data_type: BOOLEAN
+        sample_values:
+          - 'TRUE'
+          - 'FALSE'
+    facts: []
+    primary_key:
+      columns:
+        - DELAY_TYPE_KEY
+
+  - name: FCT_WEATHER_FORECAST
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_WEATHER_FORECAST
+    dimensions:
+      - name: FORECAST_KEY
+        description: Unique identifier for each weather forecast record
+        expr: FORECAST_KEY
+        data_type: NUMBER(38,0)
+      - name: WEATHER_CONDITION
+        description: Categorical weather condition
+        expr: WEATHER_CONDITION
+        data_type: VARCHAR(100)
+        sample_values:
+          - Clear
+          - Rain
+          - Hurricane
+          - Extreme Cold
+      - name: WEATHER_CATEGORY
+        description: Weather severity classification
+        expr: WEATHER_CATEGORY
+        data_type: VARCHAR(50)
+        sample_values:
+          - Normal
+          - Severe
+          - Extreme
+    time_dimensions:
+      - name: FORECAST_RUN_TIME
+        description: Timestamp when the forecast was generated
+        expr: FORECAST_RUN_TIME
+        data_type: TIMESTAMP_NTZ(9)
+    facts:
+      - name: TEMPERATURE_C
+        description: Temperature in degrees Celsius
+        expr: TEMPERATURE_C
+        data_type: NUMBER(6,2)
+      - name: TEMPERATURE_F
+        description: Temperature in degrees Fahrenheit
+        expr: TEMPERATURE_F
+        data_type: NUMBER(6,2)
+      - name: PRECIPITATION_MM
+        description: Precipitation amount in millimeters
+        expr: PRECIPITATION_MM
+        data_type: NUMBER(8,2)
+      - name: WIND_SPEED_KPH
+        description: Wind speed in kilometers per hour
+        expr: WIND_SPEED_KPH
+        data_type: NUMBER(6,2)
+      - name: WIND_SPEED_MPH
+        description: Wind speed in miles per hour
+        expr: WIND_SPEED_MPH
+        data_type: NUMBER(6,2)
+      - name: HUMIDITY_PERCENT
+        description: Relative humidity percentage
+        expr: HUMIDITY_PERCENT
+        data_type: NUMBER(5,2)
+      - name: LIGHTNING_DENSITY
+        description: Lightning strike density (strikes per square kilometer)
+        expr: LIGHTNING_DENSITY
+        data_type: NUMBER(6,2)
+      - name: ICING_PROBABILITY
+        description: Probability of icing conditions (0-1 scale)
+        expr: ICING_PROBABILITY
+        data_type: NUMBER(4,3)
+      - name: FREEZE_PROBABILITY
+        description: Probability of freezing conditions (0-1 scale)
+        expr: FREEZE_PROBABILITY
+        data_type: NUMBER(4,3)
+      - name: STORM_SEVERITY_SCORE
+        description: Storm severity score from 0-100
+        expr: STORM_SEVERITY_SCORE
+        data_type: NUMBER(5,2)
+      - name: WEATHER_SEVERITY_SCORE
+        description: Overall weather severity score from 0-100
+        expr: WEATHER_SEVERITY_SCORE
+        data_type: NUMBER(5,2)
+    primary_key:
+      columns:
+        - FORECAST_KEY
+
+  - name: DIM_TIME
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_TIME
+    dimensions:
+      - name: TIME_KEY
+        description: Unique identifier for each date
+        expr: TIME_KEY
+        data_type: NUMBER(38,0)
+      - name: YEAR
+        description: Year (YYYY)
+        expr: YEAR
+        data_type: NUMBER(4,0)
+        sample_values:
+          - '2024'
+          - '2025'
+      - name: QUARTER
+        description: Quarter of year (1-4)
+        expr: QUARTER
+        data_type: NUMBER(1,0)
+      - name: MONTH
+        description: Month number (1-12)
+        expr: MONTH
+        data_type: NUMBER(2,0)
+      - name: MONTH_NAME
+        description: Name of the month
+        expr: MONTH_NAME
+        data_type: VARCHAR(20)
+        sample_values:
+          - January
+          - February
+      - name: DAY_OF_WEEK
+        description: Day of week (0=Sunday, 6=Saturday)
+        expr: DAY_OF_WEEK
+        data_type: NUMBER(1,0)
+      - name: DAY_NAME
+        description: Name of the day
+        expr: DAY_NAME
+        data_type: VARCHAR(20)
+        sample_values:
+          - Monday
+          - Tuesday
+      - name: IS_WEEKEND
+        description: Whether date falls on weekend
+        expr: IS_WEEKEND
+        data_type: BOOLEAN
+      - name: IS_HOLIDAY
+        description: Whether date is a holiday
+        expr: IS_HOLIDAY
+        data_type: BOOLEAN
+    time_dimensions:
+      - name: FULL_DATE
+        description: Full calendar date
+        expr: FULL_DATE
+        data_type: DATE
+    facts: []
+    primary_key:
+      columns:
+        - TIME_KEY
+
+relationships:
+  - name: PROJECT_TO_SITE
+    left_table: DIM_PROJECT
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: DELAY_TO_PROJECT
+    left_table: FCT_PROJECT_DELAY_EVENT
+    relationship_columns:
+      - left_column: PROJECT_KEY
+        right_column: PROJECT_KEY
+    right_table: DIM_PROJECT
+
+  - name: DELAY_TO_DELAY_TYPE
+    left_table: FCT_PROJECT_DELAY_EVENT
+    relationship_columns:
+      - left_column: DELAY_TYPE_KEY
+        right_column: DELAY_TYPE_KEY
+    right_table: DIM_DELAY_TYPE
+
+  - name: DELAY_TO_TIME
+    left_table: FCT_PROJECT_DELAY_EVENT
+    relationship_columns:
+      - left_column: EVENT_TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+
+  - name: WEATHER_TO_SITE
+    left_table: FCT_WEATHER_FORECAST
+    relationship_columns:
+      - left_column: SITE_KEY
+        right_column: SITE_KEY
+    right_table: DIM_SITE
+
+  - name: WEATHER_TO_TIME
+    left_table: FCT_WEATHER_FORECAST
+    relationship_columns:
+      - left_column: TIME_KEY
+        right_column: TIME_KEY
+    right_table: DIM_TIME
+

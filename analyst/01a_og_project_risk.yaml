@@ -1,0 +1,690 @@
+semantic_model:
+  name: "Oil & Gas Project Risk Assessment"
+  description: "Analyzes weather-driven risks to capital project timelines and budgets in the oil and gas industry. Tracks project delays, weather severity impacts, and schedule performance metrics."
+  
+tables:
+  - name: FCT_WEATHER_FORECAST
+    description: "Hourly weather forecast data including temperature, precipitation, wind, and severity scores for all project sites"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_WEATHER_FORECAST
+    dimensions:
+      - name: FORECAST_KEY
+        synonyms: ["forecast id", "weather forecast key"]
+        description: "Unique identifier for each weather forecast record"
+        data_type: NUMBER
+        unique: true
+      - name: FORECAST_RUN_TIME
+        synonyms: ["forecast time", "when forecast was run", "forecast timestamp"]
+        description: "Timestamp when the forecast was generated"
+        data_type: TIMESTAMP_NTZ
+      - name: WEATHER_CONDITION
+        synonyms: ["weather type", "weather event", "conditions", "weather description"]
+        description: "Categorical weather condition (Clear, Rain, Hurricane, Extreme Cold, etc.)"
+        data_type: VARCHAR
+      - name: WEATHER_CATEGORY
+        synonyms: ["severity category", "weather severity level"]
+        description: "Weather severity classification: Normal, Severe, or Extreme"
+        data_type: VARCHAR
+        sample_values: ["Normal", "Severe", "Extreme"]
+    measures:
+      - name: TEMPERATURE_C
+        synonyms: ["temp celsius", "temperature in celsius", "degrees celsius"]
+        description: "Temperature in degrees Celsius"
+        aggregation: avg
+        data_type: NUMBER
+      - name: TEMPERATURE_F
+        synonyms: ["temp fahrenheit", "temperature in fahrenheit", "degrees fahrenheit", "temperature"]
+        description: "Temperature in degrees Fahrenheit"
+        aggregation: avg
+        data_type: NUMBER
+      - name: PRECIPITATION_MM
+        synonyms: ["rainfall", "rain amount", "precipitation millimeters"]
+        description: "Precipitation amount in millimeters"
+        aggregation: sum
+        data_type: NUMBER
+      - name: PRECIPITATION_IN
+        synonyms: ["rainfall inches", "precipitation inches", "rain in inches"]
+        description: "Precipitation amount in inches"
+        aggregation: sum
+        data_type: NUMBER
+      - name: WIND_SPEED_KPH
+        synonyms: ["wind speed kilometers", "wind kph"]
+        description: "Wind speed in kilometers per hour"
+        aggregation: avg
+        data_type: NUMBER
+      - name: WIND_SPEED_MPH
+        synonyms: ["wind speed miles", "wind mph", "wind speed"]
+        description: "Wind speed in miles per hour"
+        aggregation: avg
+        data_type: NUMBER
+      - name: HUMIDITY_PERCENT
+        synonyms: ["humidity", "relative humidity", "moisture"]
+        description: "Relative humidity percentage"
+        aggregation: avg
+        data_type: NUMBER
+      - name: LIGHTNING_DENSITY
+        synonyms: ["lightning risk", "lightning strikes", "lightning activity"]
+        description: "Lightning strike density (strikes per square kilometer)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: ICING_PROBABILITY
+        synonyms: ["ice risk", "icing chance", "probability of icing"]
+        description: "Probability of icing conditions (0-1 scale)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: FREEZE_PROBABILITY
+        synonyms: ["freeze risk", "freezing chance", "probability of freezing"]
+        description: "Probability of freezing conditions (0-1 scale)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: STORM_SEVERITY_SCORE
+        synonyms: ["storm severity", "storm intensity", "storm score"]
+        description: "Storm severity score from 0-100 based on wind and precipitation"
+        aggregation: avg
+        data_type: NUMBER
+      - name: WEATHER_SEVERITY_SCORE
+        synonyms: ["weather severity", "weather intensity", "overall weather score", "severity score"]
+        description: "Overall weather severity score from 0-100 (composite of all weather factors)"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: DIM_SITE
+    description: "Geographic locations including project sites, production facilities, and warehouses"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_SITE
+    dimensions:
+      - name: SITE_KEY
+        synonyms: ["site id", "location id"]
+        description: "Unique identifier for each site"
+        data_type: NUMBER
+        unique: true
+      - name: SITE_ID
+        synonyms: ["site code"]
+        description: "Business identifier for the site"
+        data_type: VARCHAR
+        unique: true
+      - name: SITE_NAME
+        synonyms: ["location name", "site", "location"]
+        description: "Descriptive name of the site"
+        data_type: VARCHAR
+      - name: SITE_TYPE
+        synonyms: ["location type", "site category"]
+        description: "Type of site: Project, Production, or Warehouse"
+        data_type: VARCHAR
+        sample_values: ["Project", "Production", "Warehouse"]
+      - name: REGION
+        synonyms: ["basin", "area", "geographic region"]
+        description: "Geographic region or basin (e.g., Permian Basin, Gulf Coast, Bakken Formation)"
+        data_type: VARCHAR
+      - name: COUNTRY
+        synonyms: ["nation"]
+        description: "Country where site is located"
+        data_type: VARCHAR
+      - name: STATE_PROVINCE
+        synonyms: ["state", "province"]
+        description: "State or province"
+        data_type: VARCHAR
+      - name: SITE_STATUS
+        synonyms: ["status", "site condition"]
+        description: "Current operational status of the site"
+        data_type: VARCHAR
+        sample_values: ["Active", "Under Construction", "Decommissioned"]
+    measures:
+      - name: LATITUDE
+        synonyms: ["lat"]
+        description: "Latitude coordinate"
+        aggregation: avg
+        data_type: NUMBER
+      - name: LONGITUDE
+        synonyms: ["long", "lon"]
+        description: "Longitude coordinate"
+        aggregation: avg
+        data_type: NUMBER
+      - name: SITE_READINESS_SCORE
+        synonyms: ["readiness", "site preparedness", "readiness score"]
+        description: "Site operational readiness score (0-100)"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: DIM_PROJECT
+    description: "Capital projects including drilling, pipeline construction, and facility development"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_PROJECT
+    dimensions:
+      - name: PROJECT_KEY
+        synonyms: ["project id"]
+        description: "Unique identifier for each project"
+        data_type: NUMBER
+        unique: true
+      - name: PROJECT_ID
+        synonyms: ["project code"]
+        description: "Business identifier for the project"
+        data_type: VARCHAR
+        unique: true
+      - name: PROJECT_NAME
+        synonyms: ["project", "project title"]
+        description: "Descriptive name of the project"
+        data_type: VARCHAR
+      - name: PROJECT_TYPE
+        synonyms: ["type of project", "project category"]
+        description: "Type of capital project"
+        data_type: VARCHAR
+        sample_values: ["Drilling", "Pipeline", "Facility Construction", "Well Completion"]
+      - name: PROJECT_MANAGER
+        synonyms: ["PM", "manager", "project lead"]
+        description: "Name of the project manager"
+        data_type: VARCHAR
+      - name: PORTFOLIO
+        synonyms: ["project portfolio", "business unit"]
+        description: "Portfolio or business unit grouping"
+        data_type: VARCHAR
+      - name: PROJECT_STATUS
+        synonyms: ["status", "project state"]
+        description: "Current status of the project"
+        data_type: VARCHAR
+        sample_values: ["Planning", "Active", "On Hold", "Complete"]
+      - name: BUDGET_CATEGORY
+        synonyms: ["budget type", "expense category"]
+        description: "Budget classification"
+        data_type: VARCHAR
+        sample_values: ["CapEx", "OpEx"]
+      - name: CAPACITY_UNIT
+        synonyms: ["unit of measure", "capacity measurement"]
+        description: "Unit of measurement for planned capacity"
+        data_type: VARCHAR
+      - name: PLANNED_START_DATE
+        synonyms: ["start date", "project start"]
+        description: "Planned project start date"
+        data_type: DATE
+      - name: PLANNED_END_DATE
+        synonyms: ["end date", "project end", "completion date"]
+        description: "Planned project completion date"
+        data_type: DATE
+      - name: IN_SERVICE_DATE
+        synonyms: ["in service", "operational date", "go-live date"]
+        description: "Date when project capacity goes into service"
+        data_type: DATE
+    measures:
+      - name: BASELINE_DURATION_DAYS
+        synonyms: ["planned duration", "project duration", "duration"]
+        description: "Baseline project duration in days"
+        aggregation: sum
+        data_type: NUMBER
+      - name: APPROVED_BUDGET_USD
+        synonyms: ["budget", "approved budget", "project budget", "capex"]
+        description: "Approved project budget in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: CURRENT_SCHEDULE_VARIANCE_DAYS
+        synonyms: ["schedule variance", "days behind schedule", "schedule delay"]
+        description: "Current schedule variance in days (negative = behind schedule)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: CURRENT_COST_VARIANCE_USD
+        synonyms: ["cost variance", "budget variance", "over budget", "under budget"]
+        description: "Current cost variance in USD (negative = over budget)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: PLANNED_CAPACITY
+        synonyms: ["capacity", "production capacity", "nameplate capacity"]
+        description: "Planned production capacity when operational"
+        aggregation: sum
+        data_type: NUMBER
+
+  - name: DIM_ACTIVITY
+    description: "Project activities and tasks from scheduling systems (P6, MS Project)"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_ACTIVITY
+    dimensions:
+      - name: ACTIVITY_KEY
+        synonyms: ["activity id", "task id"]
+        description: "Unique identifier for each activity"
+        data_type: NUMBER
+        unique: true
+      - name: ACTIVITY_ID
+        synonyms: ["activity code", "task code"]
+        description: "Business identifier from scheduling system"
+        data_type: VARCHAR
+        unique: true
+      - name: ACTIVITY_NAME
+        synonyms: ["activity", "task", "task name"]
+        description: "Descriptive name of the activity"
+        data_type: VARCHAR
+      - name: ACTIVITY_TYPE
+        synonyms: ["type of activity", "activity category", "task type"]
+        description: "Classification of the activity"
+        data_type: VARCHAR
+        sample_values: ["Drilling", "Foundation", "Installation", "Commissioning", "Site Preparation"]
+      - name: WBS_CODE
+        synonyms: ["work breakdown structure", "WBS"]
+        description: "Work Breakdown Structure code"
+        data_type: VARCHAR
+      - name: IS_CRITICAL_PATH
+        synonyms: ["critical path", "on critical path", "critical"]
+        description: "Whether activity is on the critical path"
+        data_type: BOOLEAN
+      - name: WEATHER_SENSITIVE
+        synonyms: ["weather dependent", "weather impacted"]
+        description: "Whether activity is sensitive to weather conditions"
+        data_type: BOOLEAN
+      - name: WEATHER_CONSTRAINTS
+        synonyms: ["weather requirements", "weather limits"]
+        description: "Specific weather constraints for the activity"
+        data_type: VARCHAR
+      - name: PLANNED_START_DATE
+        synonyms: ["activity start date", "start date"]
+        description: "Planned activity start date"
+        data_type: DATE
+      - name: PLANNED_END_DATE
+        synonyms: ["activity end date", "end date", "finish date"]
+        description: "Planned activity completion date"
+        data_type: DATE
+    measures:
+      - name: PLANNED_DURATION_DAYS
+        synonyms: ["duration", "activity duration", "planned duration"]
+        description: "Planned duration in days"
+        aggregation: sum
+        data_type: NUMBER
+      - name: FLOAT_DAYS
+        synonyms: ["total float", "float", "slack"]
+        description: "Total float/slack in days"
+        aggregation: avg
+        data_type: NUMBER
+      - name: FREE_FLOAT_DAYS
+        synonyms: ["free float", "free slack"]
+        description: "Free float in days"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: DIM_DELAY_TYPE
+    description: "Categories of project delays including weather, labor, material, and equipment issues"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_DELAY_TYPE
+    dimensions:
+      - name: DELAY_TYPE_KEY
+        synonyms: ["delay id"]
+        description: "Unique identifier for delay type"
+        data_type: NUMBER
+        unique: true
+      - name: DELAY_CODE
+        synonyms: ["delay code"]
+        description: "Business code for the delay type"
+        data_type: VARCHAR
+        unique: true
+      - name: DELAY_CATEGORY
+        synonyms: ["delay type", "category of delay", "delay classification"]
+        description: "High-level category of delay"
+        data_type: VARCHAR
+        sample_values: ["Weather", "Labor", "Material", "Equipment", "Permit", "Design"]
+      - name: DELAY_SUBCATEGORY
+        synonyms: ["subcategory", "delay subtype"]
+        description: "More specific delay subcategory"
+        data_type: VARCHAR
+      - name: ROOT_CAUSE_DETAIL
+        synonyms: ["root cause", "delay reason", "cause"]
+        description: "Detailed description of the root cause"
+        data_type: VARCHAR
+      - name: IS_WEATHER_RELATED
+        synonyms: ["weather related", "caused by weather", "weather delay"]
+        description: "Whether delay is weather-related"
+        data_type: BOOLEAN
+
+  - name: DIM_TIME
+    description: "Time dimension for date-based analysis and reporting"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: DIM_TIME
+    dimensions:
+      - name: TIME_KEY
+        synonyms: ["date key", "time id"]
+        description: "Unique identifier for each date"
+        data_type: NUMBER
+        unique: true
+      - name: FULL_DATE
+        synonyms: ["date", "calendar date"]
+        description: "Full calendar date"
+        data_type: DATE
+        unique: true
+      - name: YEAR
+        synonyms: ["calendar year"]
+        description: "Year"
+        data_type: NUMBER
+      - name: QUARTER
+        synonyms: ["calendar quarter", "Q"]
+        description: "Quarter of year (1-4)"
+        data_type: NUMBER
+      - name: MONTH
+        synonyms: ["calendar month", "month number"]
+        description: "Month number (1-12)"
+        data_type: NUMBER
+      - name: MONTH_NAME
+        synonyms: ["month name"]
+        description: "Name of the month"
+        data_type: VARCHAR
+      - name: DAY_OF_WEEK
+        synonyms: ["weekday number", "day number"]
+        description: "Day of week (0=Sunday, 6=Saturday)"
+        data_type: NUMBER
+      - name: DAY_NAME
+        synonyms: ["day name", "weekday"]
+        description: "Name of the day"
+        data_type: VARCHAR
+      - name: IS_WEEKEND
+        synonyms: ["weekend", "is it weekend"]
+        description: "Whether date falls on weekend"
+        data_type: BOOLEAN
+      - name: IS_HOLIDAY
+        synonyms: ["holiday", "is it a holiday"]
+        description: "Whether date is a holiday"
+        data_type: BOOLEAN
+
+  - name: FCT_PROJECT_ACTIVITY_SNAPSHOT
+    description: "Daily or weekly snapshots of project activity progress including schedule and cost performance"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PROJECT_ACTIVITY_SNAPSHOT
+    dimensions:
+      - name: SNAPSHOT_KEY
+        synonyms: ["snapshot id"]
+        description: "Unique identifier for each snapshot"
+        data_type: NUMBER
+        unique: true
+      - name: ACTIVITY_STATUS
+        synonyms: ["status", "activity state", "task status"]
+        description: "Current status of the activity"
+        data_type: VARCHAR
+        sample_values: ["Not Started", "In Progress", "Complete", "On Hold"]
+      - name: ACTUAL_START_DATE
+        synonyms: ["start date", "commenced date"]
+        description: "Actual start date of activity"
+        data_type: DATE
+      - name: ACTUAL_END_DATE
+        synonyms: ["completion date", "finish date", "actual end"]
+        description: "Actual completion date"
+        data_type: DATE
+      - name: FORECAST_START_DATE
+        synonyms: ["forecasted start", "projected start"]
+        description: "Forecasted start date"
+        data_type: DATE
+      - name: FORECAST_END_DATE
+        synonyms: ["forecasted end", "projected completion", "forecast finish"]
+        description: "Forecasted completion date"
+        data_type: DATE
+      - name: SNAPSHOT_TIMESTAMP
+        synonyms: ["snapshot time", "as of date"]
+        description: "Timestamp when snapshot was taken"
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: PERCENT_COMPLETE
+        synonyms: ["progress", "completion percentage", "percent done", "% complete"]
+        description: "Percentage of activity completed (0-100)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: ACTUAL_DURATION_DAYS
+        synonyms: ["actual duration", "days taken"]
+        description: "Actual duration in days"
+        aggregation: sum
+        data_type: NUMBER
+      - name: REMAINING_DURATION_DAYS
+        synonyms: ["remaining days", "days remaining", "duration remaining"]
+        description: "Remaining duration in days"
+        aggregation: sum
+        data_type: NUMBER
+      - name: SCHEDULE_VARIANCE_DAYS
+        synonyms: ["schedule variance", "SV days", "days behind", "schedule slip"]
+        description: "Schedule variance in days (negative = behind schedule)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: BUDGETED_COST_USD
+        synonyms: ["budgeted cost", "planned cost", "BCWS"]
+        description: "Budgeted cost in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: ACTUAL_COST_USD
+        synonyms: ["actual cost", "ACWP", "cost incurred"]
+        description: "Actual cost incurred in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: EARNED_VALUE_USD
+        synonyms: ["earned value", "EV", "BCWP"]
+        description: "Earned value in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: COST_VARIANCE_USD
+        synonyms: ["cost variance", "CV", "over budget amount", "under budget amount"]
+        description: "Cost variance in USD (negative = over budget)"
+        aggregation: sum
+        data_type: NUMBER
+      - name: SPI
+        synonyms: ["schedule performance index", "SPI"]
+        description: "Schedule Performance Index (EV/PV)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: CPI
+        synonyms: ["cost performance index", "CPI"]
+        description: "Cost Performance Index (EV/AC)"
+        aggregation: avg
+        data_type: NUMBER
+
+  - name: FCT_PROJECT_DELAY_EVENT
+    description: "Historical delay events with root causes, impacts, and weather correlations for ML training"
+    base_table:
+      database: ENERGY_WEATHER_EVENT
+      schema: ENERGY_DATA
+      table: FCT_PROJECT_DELAY_EVENT
+    dimensions:
+      - name: DELAY_EVENT_KEY
+        synonyms: ["delay id", "event id"]
+        description: "Unique identifier for each delay event"
+        data_type: NUMBER
+        unique: true
+      - name: DELAY_START_DATE
+        synonyms: ["delay began", "start of delay", "when delay started"]
+        description: "Date when delay started"
+        data_type: DATE
+      - name: DELAY_END_DATE
+        synonyms: ["delay ended", "end of delay", "when delay ended"]
+        description: "Date when delay ended"
+        data_type: DATE
+      - name: DELAY_DESCRIPTION
+        synonyms: ["description", "delay summary", "what happened"]
+        description: "Description of the delay event"
+        data_type: VARCHAR
+      - name: ROOT_CAUSE_NOTES
+        synonyms: ["root cause", "why delay occurred", "cause notes"]
+        description: "Detailed root cause analysis"
+        data_type: VARCHAR
+      - name: MITIGATION_ACTIONS
+        synonyms: ["mitigation", "actions taken", "how resolved", "recovery actions"]
+        description: "Actions taken to mitigate or recover from delay"
+        data_type: VARCHAR
+      - name: EVENT_RECORDED_AT
+        synonyms: ["recorded date", "logged date"]
+        description: "When the event was recorded"
+        data_type: TIMESTAMP_NTZ
+    measures:
+      - name: DELAY_DURATION_DAYS
+        synonyms: ["delay days", "duration of delay", "how many days delayed", "delay length"]
+        description: "Duration of the delay in days"
+        aggregation: sum
+        data_type: NUMBER
+      - name: DELAY_COST_USD
+        synonyms: ["delay cost", "cost of delay", "financial impact"]
+        description: "Financial cost of the delay in USD"
+        aggregation: sum
+        data_type: NUMBER
+      - name: CRITICAL_PATH_IMPACT_DAYS
+        synonyms: ["critical path impact", "impact to critical path", "CP impact"]
+        description: "Impact to critical path in days"
+        aggregation: sum
+        data_type: NUMBER
+      - name: PROJECT_COMPLETION_IMPACT_DAYS
+        synonyms: ["project impact", "completion impact", "overall project delay"]
+        description: "Impact to overall project completion in days"
+        aggregation: sum
+        data_type: NUMBER
+      - name: WEATHER_SEVERITY_AT_EVENT
+        synonyms: ["weather severity during delay", "weather score"]
+        description: "Weather severity score at time of delay (0-100)"
+        aggregation: avg
+        data_type: NUMBER
+      - name: TEMPERATURE_C_AT_EVENT
+        synonyms: ["temperature during delay", "temp at event"]
+        description: "Temperature in Celsius at time of delay"
+        aggregation: avg
+        data_type: NUMBER
+      - name: PRECIPITATION_MM_AT_EVENT
+        synonyms: ["rainfall during delay", "precipitation at event"]
+        description: "Precipitation in mm at time of delay"
+        aggregation: sum
+        data_type: NUMBER
+      - name: WIND_SPEED_KPH_AT_EVENT
+        synonyms: ["wind speed during delay", "wind at event"]
+        description: "Wind speed in kph at time of delay"
+        aggregation: avg
+        data_type: NUMBER
+
+relationships:
+  - name: weather_to_site
+    left_table: FCT_WEATHER_FORECAST
+    left_column: SITE_KEY
+    right_table: DIM_SITE
+    right_column: SITE_KEY
+    relationship_type: many_to_one
+    
+  - name: weather_to_time
+    left_table: FCT_WEATHER_FORECAST
+    left_column: TIME_KEY
+    right_table: DIM_TIME
+    right_column: TIME_KEY
+    relationship_type: many_to_one
+    
+  - name: project_to_site
+    left_table: DIM_PROJECT
+    left_column: SITE_KEY
+    right_table: DIM_SITE
+    right_column: SITE_KEY
+    relationship_type: many_to_one
+    
+  - name: activity_to_project
+    left_table: DIM_ACTIVITY
+    left_column: PROJECT_KEY
+    right_table: DIM_PROJECT
+    right_column: PROJECT_KEY
+    relationship_type: many_to_one
+    
+  - name: snapshot_to_project
+    left_table: FCT_PROJECT_ACTIVITY_SNAPSHOT
+    left_column: PROJECT_KEY
+    right_table: DIM_PROJECT
+    right_column: PROJECT_KEY
+    relationship_type: many_to_one
+    
+  - name: snapshot_to_activity
+    left_table: FCT_PROJECT_ACTIVITY_SNAPSHOT
+    left_column: ACTIVITY_KEY
+    right_table: DIM_ACTIVITY
+    right_column: ACTIVITY_KEY
+    relationship_type: many_to_one
+    
+  - name: snapshot_to_time
+    left_table: FCT_PROJECT_ACTIVITY_SNAPSHOT
+    left_column: SNAPSHOT_TIME_KEY
+    right_table: DIM_TIME
+    right_column: TIME_KEY
+    relationship_type: many_to_one
+    
+  - name: delay_to_project
+    left_table: FCT_PROJECT_DELAY_EVENT
+    left_column: PROJECT_KEY
+    right_table: DIM_PROJECT
+    right_column: PROJECT_KEY
+    relationship_type: many_to_one
+    
+  - name: delay_to_activity
+    left_table: FCT_PROJECT_DELAY_EVENT
+    left_column: ACTIVITY_KEY
+    right_table: DIM_ACTIVITY
+    right_column: ACTIVITY_KEY
+    relationship_type: many_to_one
+    
+  - name: delay_to_type
+    left_table: FCT_PROJECT_DELAY_EVENT
+    left_column: DELAY_TYPE_KEY
+    right_table: DIM_DELAY_TYPE
+    right_column: DELAY_TYPE_KEY
+    relationship_type: many_to_one
+    
+  - name: delay_to_time
+    left_table: FCT_PROJECT_DELAY_EVENT
+    left_column: EVENT_TIME_KEY
+    right_table: DIM_TIME
+    right_column: TIME_KEY
+    relationship_type: many_to_one
+
+verified_queries:
+  - name: "Total weather-related delays by project"
+    question: "What is the total number of days delayed due to weather for each project?"
+    sql: |
+      SELECT 
+        p.PROJECT_NAME,
+        SUM(d.DELAY_DURATION_DAYS) as TOTAL_DELAY_DAYS,
+        SUM(d.DELAY_COST_USD) as TOTAL_DELAY_COST
+      FROM FCT_PROJECT_DELAY_EVENT d
+      JOIN DIM_PROJECT p ON d.PROJECT_KEY = p.PROJECT_KEY
+      JOIN DIM_DELAY_TYPE dt ON d.DELAY_TYPE_KEY = dt.DELAY_TYPE_KEY
+      WHERE dt.IS_WEATHER_RELATED = TRUE
+      GROUP BY p.PROJECT_NAME
+      ORDER BY TOTAL_DELAY_DAYS DESC
+    verified_result: true
+    
+  - name: "Projects at risk from severe weather"
+    question: "Which projects are currently experiencing severe or extreme weather?"
+    sql: |
+      SELECT DISTINCT
+        p.PROJECT_NAME,
+        p.PROJECT_STATUS,
+        s.SITE_NAME,
+        s.REGION,
+        wf.WEATHER_CONDITION,
+        wf.WEATHER_SEVERITY_SCORE,
+        t.FULL_DATE
+      FROM DIM_PROJECT p
+      JOIN DIM_SITE s ON p.SITE_KEY = s.SITE_KEY
+      JOIN FCT_WEATHER_FORECAST wf ON s.SITE_KEY = wf.SITE_KEY
+      JOIN DIM_TIME t ON wf.TIME_KEY = t.TIME_KEY
+      WHERE wf.WEATHER_CATEGORY IN ('Severe', 'Extreme')
+        AND p.PROJECT_STATUS = 'Active'
+        AND t.FULL_DATE >= CURRENT_DATE - 7
+      ORDER BY wf.WEATHER_SEVERITY_SCORE DESC
+    verified_result: true
+    
+  - name: "Schedule performance by project"
+    question: "What is the schedule performance index for active projects?"
+    sql: |
+      SELECT 
+        p.PROJECT_NAME,
+        AVG(s.SPI) as AVG_SPI,
+        AVG(s.SCHEDULE_VARIANCE_DAYS) as AVG_SCHEDULE_VARIANCE,
+        AVG(s.PERCENT_COMPLETE) as AVG_PERCENT_COMPLETE
+      FROM FCT_PROJECT_ACTIVITY_SNAPSHOT s
+      JOIN DIM_PROJECT p ON s.PROJECT_KEY = p.PROJECT_KEY
+      JOIN DIM_ACTIVITY a ON s.ACTIVITY_KEY = a.ACTIVITY_KEY
+      WHERE p.PROJECT_STATUS = 'Active'
+        AND a.IS_CRITICAL_PATH = TRUE
+      GROUP BY p.PROJECT_NAME
+      ORDER BY AVG_SPI ASC
+    verified_result: true
+
